@@ -106,15 +106,11 @@ fun GlassChip(text: String, modifier: Modifier = Modifier) {
     }
 }
 
-/** Pleos 로고 + Postbox */
+/** 앱 이름 "플레오스 우체통". height는 예전 로고 높이 기준이라 글자 크기만 쓴다. */
 @Composable
-fun Brand(modifier: Modifier = Modifier, height: Int = 26, textSize: Int = 32) {
-    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy((height / 2).u)) {
-        Image(
-            painterResource(R.drawable.pleos_logo), "Pleos",
-            Modifier.height(height.u).width((height * 3.5f).toInt().u),
-            colorFilter = ColorFilter.tint(Ink.White),
-        )
-        Text(stringResource(R.string.brand_postbox), color = Ink.White, fontSize = textSize.su, fontWeight = FontWeight.SemiBold)
-    }
+fun Brand(modifier: Modifier = Modifier, @Suppress("UNUSED_PARAMETER") height: Int = 26, textSize: Int = 32) {
+    Text(
+        stringResource(R.string.brand), modifier = modifier,
+        color = Ink.White, fontSize = textSize.su, fontWeight = FontWeight.SemiBold, maxLines = 1,
+    )
 }

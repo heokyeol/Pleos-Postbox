@@ -67,7 +67,7 @@ fun PairingScreen(code: String, onConfirm: () -> Unit) {
 }
 
 @Composable
-private fun QrCode(content: String, modifier: Modifier) {
+fun QrCode(content: String, modifier: Modifier) {
     val matrix = remember(content) {
         QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, 0, 0, mapOf(EncodeHintType.MARGIN to 0))
     }

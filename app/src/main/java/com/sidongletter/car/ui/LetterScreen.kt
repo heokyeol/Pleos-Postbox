@@ -3,6 +3,9 @@ package com.sidongletter.car.ui
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -61,6 +64,7 @@ fun LetterScreen(
         played += letter.id
     }
     val playing = elapsed.value < duration
+    var saving by remember(letter.id) { mutableStateOf(false) }
 
     Box(Modifier.fillMaxSize()) {
         LetterCanvas(letter, if (playing) elapsed.value.toLong() else null, Modifier.fillMaxSize())
@@ -72,11 +76,20 @@ fun LetterScreen(
         if (header.position != null) GlassChip(header.position, Modifier.align(Alignment.TopEnd).padding(40.u))
 
         Column(
-            Modifier.align(Alignment.BottomStart).padding(40.u).width(260.u),
+            Modifier.align(Alignment.BottomStart).padding(40.u),
             verticalArrangement = Arrangement.spacedBy(16.u),
         ) {
             if (!playing) RoundIconButton(R.drawable.ic_replay, stringResource(R.string.replay), { token++ })
-            if (onReply != null) PillButton(stringResource(R.string.reply), onReply, Modifier.fillMaxWidth(), look = Look.GlassPrimary)
+            Row(horizontalArrangement = Arrangement.spacedBy(16.u)) {
+                if (onReply != null) {
+                    // 재생 중에 답장을 눌러도, 돌아오면 다 그린 모습으로 남게 한다
+                    PillButton(
+                        stringResource(R.string.reply), { played += letter.id; onReply() },
+                        Modifier.width(260.u), look = Look.GlassPrimary,
+                    )
+                }
+                RoundIconButton(R.drawable.ic_download, stringResource(R.string.save), { saving = true })
+            }
         }
 
         if (playing && duration > 0) {
@@ -85,8 +98,32 @@ fun LetterScreen(
                     .background(Ink.Glass)
             )
         }
+
+        if (saving) SaveToPhoneOverlay(letter) { saving = false }
     }
 }
+
+/** 휴대폰에 저장: QR을 찍으면 휴대폰 웹에서 이 편지 그림을 연다. 바깥을 누르면 닫힌다. */
+@Composable
+private fun SaveToPhoneOverlay(letter: Letter, onClose: () -> Unit) {
+    val url = stringResource(R.string.letter_url, stringResource(R.string.web_url), letter.id)
+    Box(
+        Modifier.fillMaxSize().background(Ink.GlassStrong).tapAnywhere(onClose),
+        contentAlignment = Alignment.Center,
+    ) {
+        RoundIconButton(R.drawable.ic_back, stringResource(R.string.close), onClose, Modifier.align(Alignment.TopStart).padding(40.u))
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(40.u)) {
+            Box(Modifier.size(480.u).clip(RoundedCornerShape(36.u)).background(Ink.Paper).padding(40.u)) {
+                QrCode(url, Modifier.fillMaxSize())
+            }
+            Text(stringResource(R.string.save_how), color = Ink.White, fontSize = 36.su, fontWeight = FontWeight.Medium)
+        }
+    }
+}
+
+/** 물결 효과 없이 아무 곳이나 누르면. 위에 놓인 버튼이 먼저 받는다. */
+private fun Modifier.tapAnywhere(onTap: () -> Unit): Modifier =
+    pointerInput(onTap) { detectTapGestures { onTap() } }
 
 /** V3·V4: 답장 고르기와 음성 답장. 그림은 다 그린 모습으로 멈춰 있다. */
 @Composable
@@ -104,16 +141,21 @@ fun ReplyScreen(
     }
     DisposableEffect(letter.id) { onDispose { speech.cancel() } }
 
-    Box(Modifier.fillMaxSize()) {
+    // 원형 뒤로가기와 버튼 바깥 터치: 음성 중이면 답장 고르기로, 아니면 답장 취소
+    val back: () -> Unit = { if (voice) { speech.cancel(); voice = false } else onCancel() }
+
+    Box(Modifier.fillMaxSize().tapAnywhere(back)) {
         LetterCanvas(letter, null, Modifier.fillMaxSize())
-        InfoChip(stringResource(R.string.reply_to, letter.senderName), null, Modifier.padding(40.u))
+        Row(Modifier.padding(40.u), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.u)) {
+            RoundIconButton(R.drawable.ic_back, stringResource(R.string.cancel), back)
+            InfoChip(stringResource(R.string.reply_to, letter.senderName), null)
+        }
 
         Column(
             Modifier.align(Alignment.BottomStart).padding(40.u).width(260.u),
             verticalArrangement = Arrangement.spacedBy(16.u),
         ) {
             if (!voice) {
-                PillButton(stringResource(R.string.cancel), onCancel, Modifier.fillMaxWidth())
                 stringArrayResource(R.array.reply_presets).forEach { p ->
                     PillButton(textGlyphs(p), { onSend(p, true) }, Modifier.fillMaxWidth())
                 }
@@ -122,7 +164,6 @@ fun ReplyScreen(
                     look = Look.GlassPrimary, icon = R.drawable.ic_mic,
                 )
             } else {
-                PillButton(stringResource(R.string.cancel), { speech.cancel(); voice = false }, Modifier.fillMaxWidth())
                 PillButton(stringResource(R.string.speak_again), { listen() }, Modifier.fillMaxWidth())
                 PillButton(
                     stringResource(R.string.send), { heard?.let { onSend(it, false) } }, Modifier.fillMaxWidth(),
