@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pleos Postbox</title>
+  <meta name="theme-color" content="#F2F3F5">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Postbox">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="desk">
+    <!-- 스케치북: 차 화면 비율 그대로 -->
+    <div class="stage" id="stage">
+      <div class="board" id="board">
+        <canvas id="paper" aria-label="편지를 그리는 곳"></canvas>
+        <p class="board-hint" id="board-hint">여기에 그려 보세요</p>
+
+        <!-- 글상자 입력: 키보드에 가리지 않게 스케치북 위쪽에 뜬다 -->
+        <form class="text-bar" id="text-bar" hidden>
+          <input id="text-input" maxlength="40" autocomplete="off" enterkeyhint="done" placeholder="쓸 말을 입력하세요" aria-label="글상자 내용">
+          <button type="submit">완료</button>
+        </form>
+
+        <p class="toast" id="toast" role="status" aria-live="polite"></p>
+        <span class="preview-tag" id="preview-tag" hidden>미리보기 모드</span>
+      </div>
+    </div>
+
+    <!-- 툴바 -->
+    <aside class="rail" role="toolbar" aria-label="그리기 도구">
+      <img class="rail-logo" src="brand/pleos.svg" alt="Pleos" width="70" height="20">
+      <div class="inks" id="inks"></div>
+      <div class="widths" id="widths"></div>
+      <div class="actions">
+        <button class="icon-btn" id="undo-btn" type="button" aria-label="되돌리기">
+          <svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+        </button>
+        <button class="icon-btn" id="text-btn" type="button" aria-label="글상자" aria-pressed="false">
+          <svg viewBox="0 0 24 24"><path d="M5 6.5V5h14v1.5M12 5v14M9 19h6"/></svg>
+        </button>
+        <button class="icon-btn who" id="who-btn" type="button" aria-label="보내는 사람 바꾸기"><span id="who-initial"></span></button>
+      </div>
+      <button class="send" id="send-btn" type="button">
+        <span>보내기</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+      </button>
+    </aside>
+  </main>
+
+  <!-- 처음 한 번: 가족 코드와 이름 -->
+  <div class="sheet-backdrop" id="sheet" hidden>
+    <form class="sheet" id="setup-form" novalidate>
+      <h1 class="sheet-title"><img src="brand/pleos.svg" alt="Pleos" width="70" height="20"><span>Postbox</span></h1>
+      <p class="sheet-sub">차 화면에 보이는 가족 코드와, 편지에 쓸 이름을 알려 주세요.</p>
+      <label class="field">
+        <span>가족 코드</span>
+        <input id="code-input" class="code-input" inputmode="text" autocomplete="off" autocapitalize="characters"
+               spellcheck="false" maxlength="6" placeholder="K7Q2MX" required>
+      </label>
+      <label class="field">
+        <span>이름</span>
+        <input id="name-input" maxlength="20" autocomplete="nickname" placeholder="예: 민준, 엄마" required>
+      </label>
+      <p class="sheet-error" id="setup-error" role="alert"></p>
+      <button class="send wide" type="submit"><span>시작하기</span></button>
+      <div class="sheet-foot"><img src="brand/hyundai-motor-group.svg" alt="Hyundai Motor Group" width="282" height="90"></div>
+    </form>
+  </div>
+
+  <!-- 세로로 든 휴대폰 -->
+  <div class="rotate" aria-live="polite">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="22" y="10" width="20" height="36" rx="4"/><path d="M14 50a22 22 0 0 0 36 0"/><path d="m46 44 4 6 6-3"/></svg>
+    <p>휴대폰을 가로로 돌려 주세요</p>
+    <p class="rotate-sub">차 화면과 같은 모양으로 그려져요</p>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

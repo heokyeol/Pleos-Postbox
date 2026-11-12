@@ -1,0 +1,14 @@
+.gradle/
+build/
+local.properties
+*.jks
+*.keystore
+.idea/
+*.iml
+.DS_Store
+captures/
+.kotlin/
+web/config.js
+
+# 개인 문서(공모전 신청서·동의서 등)는 올리지 않는다
+*.pages

@@ -1,0 +1,153 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>Pleos Postbox 편지 뷰 v2</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{--black:#0C0B0A;--white:#F6F1E9;--paper:#FFFFFF;--dim:#A9A198;--line:#36322E;--red:#E5484D;
+--glass:rgba(12,11,10,.52);--glass-hi:rgba(246,241,233,.9);}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:"Pretendard Variable",Pretendard,system-ui,sans-serif;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;background:#E9EAEC;color:#000;padding:56px 56px 96px}
+.defs{position:absolute;width:0;height:0;overflow:hidden}
+h1{font-size:28px;font-weight:600;margin:0 0 6px;letter-spacing:-.02em}
+.sub{margin:0 0 40px;color:#5B6068;font-size:15px;max-width:1100px;line-height:1.6}
+.row{display:flex;flex-wrap:wrap;gap:36px 32px}
+figure{margin:0}figcaption{margin-top:10px;font-size:13px;color:#5B6068;max-width:864px;line-height:1.5}
+figcaption b{color:#000;font-weight:600;margin-right:6px}
+.scale{width:864px;height:486px}.scale .car{transform:scale(.45);transform-origin:0 0}
+.car{position:relative;overflow:hidden;width:1920px;height:1080px;background:var(--paper);color:var(--white)}
+.car svg.art{position:absolute;inset:0;width:100%;height:100%}
+/* 떠 있는 반투명 요소 */
+.g{background:var(--glass);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);color:var(--white)}
+.info{position:absolute;left:40px;top:40px;height:88px;border-radius:44px;padding:0 36px;display:flex;align-items:center;gap:20px;white-space:nowrap}
+.info .name{font-size:40px;font-weight:700}.info .meta{font-size:32px;color:#D9D2C8}
+.count{position:absolute;right:40px;top:40px;height:88px;border-radius:44px;padding:0 32px;display:flex;align-items:center;font-size:32px;font-variant-numeric:tabular-nums}
+.rail{position:absolute;left:40px;bottom:40px;display:flex;flex-direction:column;gap:16px;width:260px}
+.btn{height:104px;border-radius:52px;display:flex;align-items:center;justify-content:center;gap:14px;font-size:34px;font-weight:600;letter-spacing:-.02em}
+.btn.pri{background:var(--glass-hi);color:var(--black);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px)}
+.btn svg{width:36px;height:36px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bar{position:absolute;left:0;bottom:0;height:8px;background:rgba(12,11,10,.35)}
+.said{position:absolute;left:340px;right:40px;bottom:40px;height:104px;border-radius:52px;display:flex;align-items:center;padding:0 44px;font-size:40px;font-weight:600}
+.said.wait{color:#D9D2C8;font-weight:500}
+.listen{display:flex;align-items:center;gap:7px;margin-right:24px}.listen span{width:8px;border-radius:4px;background:var(--white)}
+/* 주행 중 잠금: 그림 없음, 정지 */
+.car.lock{background:var(--black)}
+.lockcard{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:28px;text-align:center}
+.lockcard .ic{width:140px;height:140px;border-radius:50%;background:#1D1B19;display:grid;place-items:center}
+.lockcard .ic svg{width:60px;height:60px;fill:none;stroke:var(--white);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.lockcard .t{font-size:56px;font-weight:700}.lockcard .s{font-size:36px;color:var(--dim)}
+
+.btn.round{width:104px;padding:0;flex:none}
+.btn.round svg{width:42px;height:42px}
+.back{position:absolute;left:40px;top:40px}
+.info.with-back{left:160px;top:48px}
+.rail .roundrow{display:flex;gap:16px}
+/* 받은 편지함 */
+.car.archive{background:var(--black);overflow:hidden}
+.a-head{position:absolute;left:64px;right:64px;top:48px;height:104px;display:flex;align-items:center;gap:28px}
+.a-head .brand{display:flex;align-items:center;gap:12px;font-size:34px;font-weight:600}
+.a-head .brand img{height:28px;filter:invert(1)}
+.a-head h2{margin:0;font-size:48px;font-weight:700;letter-spacing:-.02em}
+.a-head .sep{width:2px;height:40px;background:var(--line)}
+.a-head .invite{margin-left:auto;height:88px;border-radius:44px;padding:0 40px;background:#1D1B19;display:flex;align-items:center;font-size:32px;font-weight:600}
+.a-body{position:absolute;left:64px;right:64px;top:200px}
+.a-day{font-size:34px;color:var(--dim);margin:0 0 24px;font-weight:500}
+.a-day b{color:var(--white);font-weight:600;margin-right:16px}
+.a-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px 32px;margin-bottom:56px}
+.thumb{aspect-ratio:16/9;border-radius:20px;background:var(--paper);overflow:hidden;position:relative}
+.thumb svg{position:absolute;inset:0;width:100%;height:100%}
+.a-title{font-size:36px;font-weight:600;margin-top:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a-from{display:flex;align-items:baseline;gap:16px;margin-top:20px;white-space:nowrap}
+.a-from b{font-size:40px;font-weight:600;color:var(--white)}
+.a-from span{font-size:32px;color:var(--dim)}
+</style></head><body>
+<svg class="defs" aria-hidden="true">
+  <defs>
+    <g id="g-car" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="13">
+      <path stroke="#30A46C" d="M150 712 q300 -22 620 -6 t690 2"/>
+      <path stroke="#E5484D" d="M420 640 c-22 -72 10 -120 90 -126 l112 -8 c50 -96 120 -136 230 -138 l150 -2 c112 0 170 52 216 140 l120 22 c70 14 86 60 74 112 z"/>
+      <path stroke="#0090FF" d="M668 498 c38 -62 84 -86 150 -90 l8 92 z"/>
+      <path stroke="#0090FF" d="M876 406 l122 -2 c64 4 104 38 132 94 l-250 2 z"/>
+      <circle stroke="#000" cx="602" cy="652" r="60"/>
+      <circle stroke="#000" cx="1182" cy="650" r="62"/>
+    </g>
+    <g id="g-sky" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="13">
+      <path stroke="#FFC53D" d="M1250 186 c0 -50 38 -84 84 -82 c46 2 80 38 78 84 c-2 46 -38 80 -84 78 c-44 -2 -78 -36 -78 -80 z"/>
+      <path stroke="#FFC53D" d="M1332 60 v-28 M1440 104 l22 -22 M1470 190 h30 M1436 282 l22 20 M1330 312 v28 M1226 278 l-22 22 M1196 186 h-30 M1228 96 l-20 -20"/>
+      <path stroke="#E93D82" d="M300 250 c-40 -70 -140 -30 -110 50 c20 55 80 90 110 120 c30 -30 90 -65 110 -120 c30 -80 -70 -120 -110 -50 z"/>
+    </g>
+    <text id="g-text" x="480" y="842" font-family="Pretendard Variable, Pretendard, sans-serif" font-size="74" font-weight="600" fill="#000" letter-spacing="-1">아빠 오늘도 안전운전!</text>
+    <symbol id="art-full" viewBox="0 0 1600 900"><use href="#g-car"/><use href="#g-sky"/><use href="#g-text"/></symbol>
+    <symbol id="art-draw" viewBox="0 0 1600 900"><use href="#g-car"/><use href="#g-sky"/></symbol>
+    <symbol id="art-part" viewBox="0 0 1600 900"><use href="#g-car"/></symbol>
+
+    <symbol id="i-eraser" viewBox="0 0 24 24"><path d="M8.5 19 4 14.5a1.5 1.5 0 0 1 0-2.1l8.4-8.4a1.5 1.5 0 0 1 2.1 0l5.5 5.5a1.5 1.5 0 0 1 0 2.1L12.5 19zM9 8l7 7M8.5 19H20"/></symbol>
+    <symbol id="i-text" viewBox="0 0 24 24"><path d="M5 7V5h14v2M12 5v14M9 19h6"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.5S4 15.6 4 9.6A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 8 2.6c0 6-8 10.9-8 10.9z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></symbol>
+    <symbol id="i-replay" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.6-5.9M4 4.5v4h4"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  </defs>
+</svg>
+<h1>편지 뷰 v2 — 화면 가득한 편지</h1>
+<p class="sub">1920×1080. 편지 종이가 화면 전체를 채우고, 필요한 버튼만 반투명하게 띄운다. 뒤로가기(왼쪽 위)를 누르면 받은 편지함으로 간다. '다시 보기'와 뒤로가기는 아이콘만 있는 원형 버튼. 첫 화면(가족 연결 C1, 편지 없음 C2)은 기존 디자인 그대로.</p>
+<div class="row">
+<figure><div class="scale"><div class="car">
+  <svg class="art"><use href="#art-part"/></svg>
+  <div class="g btn round back"><svg><use href="#i-back"/></svg></div>
+  <div class="g info with-back"><span class="name">민준</span><span class="meta">오늘 아침 8:12</span></div>
+  <div class="g count">1 / 2</div>
+  <div class="rail"><div class="btn pri">답장</div></div>
+  <div class="bar" style="width:46%"></div>
+</div></div><figcaption><b>V1 재생 중</b>종이 전체에 그린 순서대로 다시 그려진다(최대 8초). 맨 아래 가는 줄이 진행 정도.</figcaption></figure>
+
+<figure><div class="scale"><div class="car">
+  <svg class="art"><use href="#art-full"/></svg>
+  <div class="g btn round back"><svg><use href="#i-back"/></svg></div>
+  <div class="g info with-back"><span class="name">민준</span><span class="meta">오늘 아침 8:12</span></div>
+  <div class="g count">1 / 2</div>
+  <div class="rail"><div class="roundrow"><div class="g btn round"><svg><use href="#i-replay"/></svg></div></div><div class="btn pri">답장</div></div>
+</div></div><figcaption><b>V2 재생 끝</b>원형 '다시 보기'가 생긴다. 새 편지가 더 있으면 답장하거나 뒤로 갈 때 다음 편지가 열린다.</figcaption></figure>
+
+<figure><div class="scale"><div class="car">
+  <svg class="art"><use href="#art-full"/></svg>
+  <div class="g info"><span class="name">민준에게 답장</span></div>
+  <div class="rail"><div class="g btn">취소</div><div class="g btn">고마워</div><div class="g btn">사랑해</div><div class="g btn">곧 갈게</div><div class="g btn">♥</div><div class="btn pri"><svg><use href="#i-mic"/></svg>말하기</div></div>
+</div></div><figcaption><b>V3 답장 고르기</b>누르면 바로 보내진다. '말하기'는 음성 답장.</figcaption></figure>
+
+<figure><div class="scale"><div class="car">
+  <svg class="art"><use href="#art-full"/></svg>
+  <div class="g info"><span class="name">민준에게 답장</span></div>
+  <div class="rail"><div class="g btn">취소</div><div class="g btn">다시 말하기</div><div class="btn pri">보내기</div></div>
+  <div class="g said"><div class="listen"><span style="height:20px"></span><span style="height:44px"></span><span style="height:60px"></span><span style="height:32px"></span><span style="height:48px"></span></div>“조금 늦어, 먼저 먹고 있어”</div>
+</div></div><figcaption><b>V4 음성 답장</b>듣는 동안은 "듣고 있어요"가 보이고 '보내기'가 꺼져 있다. 인식되면 문장이 그 자리에 나온다.</figcaption></figure>
+
+<figure><div class="scale"><div class="car">
+  <svg class="art"><use href="#art-full"/></svg>
+  <div class="g btn round back"><svg><use href="#i-back"/></svg></div>
+  <div class="g info with-back"><span class="name">민준</span><span class="meta">“고마워”라고 답장했어요</span></div>
+  <div class="rail"><div class="roundrow"><div class="g btn round"><svg><use href="#i-replay"/></svg></div></div></div>
+</div></div><figcaption><b>V5 답장한 뒤</b>편지가 화면 가득 남는다. 뒤로 가면 받은 편지함.</figcaption></figure>
+
+<figure><div class="scale"><div class="car archive">
+  <div class="a-head"><div class="brand"><img src="../../web/brand/pleos.svg" alt="Pleos"><span>Postbox</span></div><div class="sep"></div><h2>받은 편지</h2><div class="invite">가족 초대</div></div>
+  <div class="a-body">
+    <div class="a-day"><b>오늘</b>11월 13일 금요일</div>
+    <div class="a-grid">
+      <div><div class="thumb"><svg viewBox="0 0 1600 900"><use href="#g-car"/><use href="#g-sky"/><use href="#g-text"/></svg></div><div class="a-from"><b>민준</b><span>아침 8:12</span></div></div>
+      <div><div class="thumb"><svg viewBox="0 0 1600 900"><use href="#g-sky"/></svg></div><div class="a-from"><b>지우</b><span>아침 7:40</span></div></div>
+    </div>
+    <div class="a-day"><b>11월 10일</b>화요일</div>
+    <div class="a-grid">
+      <div><div class="thumb"><svg viewBox="0 0 1600 900"><use href="#g-car"/></svg></div><div class="a-from"><b>민준</b><span>저녁 6:05</span></div></div>
+      <div><div class="thumb"><svg viewBox="0 0 1600 900"><use href="#g-car"/><use href="#g-sky"/></svg></div><div class="a-from"><b>엄마</b><span>낮 2:30</span></div></div>
+      <div><div class="thumb"><svg viewBox="0 0 1600 900"><use href="#g-sky"/><use href="#g-text"/></svg></div><div class="a-from"><b>지우</b><span>아침 8:01</span></div></div>
+    </div>
+  </div>
+</div></div><figcaption><b>V7 받은 편지함</b>지금까지 받은 편지가 날짜별로 묶여 최신순으로 쌓인다. 썸네일 아래에 보낸 사람 이름(크게)과 시각(작게). 세로로 넘기고, 누르면 V2처럼 화면 가득 열린다(그림은 재생). 주행 중이면 이 화면도 V6 잠금으로 바뀐다.</figcaption></figure>
+
+<figure><div class="scale"><div class="car lock">
+  <div class="lockcard"><div class="ic"><svg><use href="#i-lock"/></svg></div><div class="t">편지 두 통이 기다리고 있어요</div><div class="s">주차하면 열려요</div></div>
+</div></div><figcaption><b>V6 주행 중 잠금</b>P가 아니면 그림 없이 이 화면만. 버튼도 움직임도 없다. 새 편지가 없으면 문구는 "주차하면 편지함을 볼 수 있어요".</figcaption></figure>
+</div></body></html>

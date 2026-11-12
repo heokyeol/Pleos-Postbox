@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Pleos Postbox 화면 디자인</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap">
+<style>
+/* 목업 전용 파일. 기능 없음. ?shot=<id> 로 열면 그 화면만 원래 크기로 보인다(PNG 내보내기용). */
+:root {
+  --black: #0C0B0A;     /* 따뜻한 검정 */
+  --surface: #1D1B19;   /* 바탕 위의 버튼·패널 */
+  --surface-hi: #2B2826;
+  --line: #36322E;
+  --white: #F6F1E9;     /* 글자·주 버튼. 종이보다 한 톤 낮은 따뜻한 흰색 */
+  --paper: #FFFFFF;     /* 종이만 순백. 화면에서 가장 밝다 */
+  --dim: #A9A198;       /* 보조 글자 (대비 7.6:1) */
+  --faint: #BDB5AA;     /* 흰 종이 위 안내 글자 */
+  --off: #6C665F;       /* 꺼진 버튼 글자 */
+  --glow: rgba(255, 221, 184, .13); /* 종이에서 번지는 빛 */
+  --serif: "Gowun Batang", "Nanum Myeongjo", serif; /* 마음이 담기는 한 줄에만 */
+  --red: #E5484D; --orange: #F76B15; --yellow: #FFC53D; --green: #30A46C;
+  --blue: #0090FF; --purple: #8E4EC6; --pink: #E93D82;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: "Pretendard Variable", Pretendard, system-ui, sans-serif;
+  letter-spacing: -0.01em; -webkit-font-smoothing: antialiased;
+  background: #E9EAEC; color: #000; padding: 56px 56px 96px;
+}
+.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* ---------- 보드 ---------- */
+.board-title { font-size: 28px; font-weight: 600; margin: 0 0 6px; letter-spacing: -0.02em; }
+.board-sub { margin: 0 0 40px; color: #5B6068; font-size: 15px; }
+.group { font-size: 18px; font-weight: 600; margin: 56px 0 20px; }
+.group small { font-weight: 400; color: #5B6068; margin-left: 10px; font-size: 14px; }
+.row { display: flex; flex-wrap: wrap; gap: 36px 32px; align-items: flex-start; }
+.item figcaption { margin-top: 10px; font-size: 13px; color: #5B6068; max-width: 844px; line-height: 1.5; }
+.item figcaption b { color: #000; font-weight: 600; margin-right: 6px; }
+figure { margin: 0; }
+.scale-car { width: 864px; height: 486px; }
+.scale-car .car { transform: scale(.45); transform-origin: 0 0; }
+.frame { position: relative; overflow: hidden; background: var(--black); color: var(--white); }
+
+/* ---------- 쓰기: 휴대폰 가로 844×390 ---------- */
+.phone { width: 844px; height: 390px; border-radius: 28px; }
+.phone.portrait { width: 390px; height: 844px; }
+.p-paper {
+  position: absolute; left: 93px; top: 10px; width: 658px; height: 370px;
+  background: var(--paper); border-radius: 18px; overflow: hidden;
+  box-shadow: 0 0 56px var(--glow);
+}
+.p-paper svg.art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.p-hint { position: absolute; inset: 0; display: grid; place-items: center; color: var(--faint); font-size: 17px; font-family: var(--serif); }
+.p-tools {
+  position: absolute; left: 0; top: 0; width: 93px; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+}
+.tool {
+  width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
+  color: var(--white);
+}
+.tool svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.tool.on { background: var(--white); color: var(--black); }
+.tool.off { opacity: .32; }
+.tool .dot { width: 24px; height: 24px; border-radius: 50%; background: var(--c, #000); box-shadow: 0 0 0 2px var(--black), 0 0 0 3.5px var(--white); }
+.tool.on .dot { box-shadow: none; }
+.p-side {
+  position: absolute; right: 0; top: 0; width: 93px; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px 0 18px;
+}
+.who {
+  width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--surface); border: 1px solid var(--line); font-size: 15px; font-weight: 600;
+}
+.send { display: grid; justify-items: center; gap: 7px; font-size: 12px; font-weight: 500; }
+.send i {
+  width: 56px; height: 56px; border-radius: 50%; background: var(--white); color: var(--black);
+  display: grid; place-items: center;
+}
+.send svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.send.off { color: var(--dim); }
+.send.off i { background: var(--surface); color: var(--off); }
+
+.pop {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  background: var(--surface); border-radius: 24px; padding: 16px; width: 204px;
+  box-shadow: 0 0 0 1px var(--line);
+}
+.pop .inks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; justify-items: center; }
+.pop .ink { width: 34px; height: 34px; border-radius: 50%; background: var(--c); }
+.pop .ink.sel { box-shadow: 0 0 0 2.5px var(--surface), 0 0 0 4.5px var(--white); }
+.pop .ink.k { background: #000; box-shadow: inset 0 0 0 1px #5A544E; }
+.pop .widths { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.pop .w { height: 40px; border-radius: 20px; display: grid; place-items: center; }
+.pop .w span { border-radius: 50%; background: var(--dim); }
+.pop .w.sel { background: var(--surface-hi); }
+.pop .w.sel span { background: var(--white); }
+
+.textbar {
+  position: absolute; left: 50%; top: 12px; transform: translateX(-50%);
+  width: 400px; height: 48px; border-radius: 24px; background: var(--black); color: var(--white);
+  display: flex; align-items: center; padding: 0 6px 0 20px; font-size: 16px;
+}
+.textbar .caret { width: 1.5px; height: 20px; background: var(--white); margin-left: 2px; }
+.textbar b { margin-left: auto; height: 36px; padding: 0 14px; border-radius: 18px; background: var(--white); color: var(--black); font-weight: 600; font-size: 14px; display: grid; place-items: center; }
+.ghost-text { position: absolute; left: 30%; top: 83%; font-size: 29px; font-weight: 600; color: #000; white-space: nowrap; outline: 1.5px dashed #A9A198; outline-offset: 5px; border-radius: 2px; line-height: 1; }
+
+.toast {
+  position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
+  height: 44px; padding: 0 18px; border-radius: 22px; background: var(--black); color: var(--white);
+  display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; white-space: nowrap;
+}
+.toast span { color: var(--dim); font-weight: 400; }
+.toast svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* 처음 설정 */
+.setup { display: flex; align-items: center; height: 100%; padding: 0 72px; gap: 72px; }
+.brand { display: flex; align-items: center; gap: 9px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; }
+.brand img { height: 19px; width: auto; filter: invert(1); display: block; }
+.setup .intro { flex: 1; display: grid; gap: 18px; }
+.setup .intro p { margin: 0; font-family: var(--serif); font-size: 19px; color: var(--dim); }
+.form { width: 348px; display: grid; gap: 8px; }
+.form label { font-size: 13px; color: var(--dim); }
+.cells { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.cells span {
+  height: 54px; border-radius: 14px; background: var(--surface); display: grid; place-items: center;
+  font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.cells span.cur { box-shadow: inset 0 0 0 1.5px var(--white); }
+.cells span.cur::after { content: ""; width: 1.5px; height: 24px; background: var(--white); }
+.form .help { font-size: 12px; color: var(--dim); margin-bottom: 8px; }
+.form .input { height: 48px; border-radius: 14px; background: var(--surface); display: flex; align-items: center; padding: 0 14px; font-size: 16px; margin-bottom: 10px; }
+.btn-w { height: 50px; border-radius: 25px; background: var(--white); color: var(--black); display: grid; place-items: center; font-size: 16px; font-weight: 600; }
+.btn-w.off { background: var(--surface); color: var(--off); }
+
+.rotate { height: 100%; display: grid; place-content: center; justify-items: center; gap: 20px; font-size: 19px; font-family: var(--serif); }
+.rotate svg { width: 72px; height: 72px; fill: none; stroke: var(--white); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- 받기: 차량 1920×1080 (dp). 글자 32 이상, 버튼 높이 104 ---------- */
+.car { width: 1920px; height: 1080px; }
+.c-paper {
+  position: absolute; left: 336px; top: 48px; width: 1536px; height: 864px;
+  border-radius: 28px; background: var(--paper); overflow: hidden;
+  box-shadow: 0 0 150px var(--glow);
+}
+.c-paper svg.art { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* 잠금 = 아직 뜯지 않은 봉투. 뒤에 한 장이 더 겹쳐 보이면 여러 통 */
+.c-paper.closed { background: #161412; box-shadow: inset 0 0 0 2px var(--line); }
+.c-paper.closed .flap { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: var(--line); stroke-width: 2.5; stroke-linejoin: round; }
+.seal { position: absolute; left: 50%; top: 49.8%; transform: translate(-50%, -50%); width: 116px; height: 116px; border-radius: 50%; background: var(--surface-hi); display: grid; place-items: center; }
+.seal svg { width: 50px; height: 50px; fill: var(--red); }
+.c-under { position: absolute; left: 372px; top: 28px; width: 1464px; height: 80px; border-radius: 28px 28px 0 0; background: #121110; box-shadow: inset 0 0 0 2px #2A2724; }
+.c-paper.none { background: none; box-shadow: none; }
+.c-paper.none::before { content: ""; position: absolute; inset: 1px; border-radius: 27px; border: 2px dashed var(--line); }
+.c-bar { position: absolute; left: 0; bottom: 0; height: 6px; background: #000; border-radius: 0 3px 3px 0; }
+.c-cap {
+  position: absolute; left: 336px; right: 48px; top: 912px; height: 120px;
+  display: flex; align-items: center; gap: 24px; white-space: nowrap;
+}
+.c-cap .name { font-size: 50px; font-weight: 700; letter-spacing: -0.02em; font-family: var(--serif); }
+.c-cap .meta { font-size: 34px; color: var(--dim); }
+.c-cap .count { margin-left: auto; font-size: 34px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.c-rail {
+  position: absolute; left: 48px; top: 48px; width: 240px; bottom: 48px;
+  display: flex; flex-direction: column; justify-content: flex-end; gap: 16px;
+}
+.c-rail .brand { position: absolute; left: 0; top: 4px; font-size: 32px; flex-direction: column; align-items: flex-start; gap: 12px; }
+.c-rail .brand img { height: 26px; }
+.cbtn {
+  height: 104px; border-radius: 52px; background: var(--surface); color: var(--white);
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  font-size: 34px; font-weight: 600; letter-spacing: -0.02em;
+}
+.cbtn.pri { background: var(--white); color: var(--black); }
+.cbtn.plain { background: none; color: var(--dim); font-weight: 500; }
+.cbtn svg { width: 36px; height: 36px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.cbtn.top { margin-bottom: auto; }
+.listen { display: flex; align-items: center; gap: 7px; height: 104px; justify-content: center; margin-bottom: auto; }
+.listen span { width: 8px; border-radius: 4px; background: var(--white); }
+
+/* 연결 */
+.pair { position: absolute; inset: 0; padding: 48px 96px 48px 48px; display: flex; }
+.pair .left { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+.pair .brand { font-size: 36px; }
+.pair .brand img { height: 30px; }
+.pair .label { font-size: 34px; color: var(--dim); margin-bottom: 8px; }
+.pair .code { font-size: 200px; font-weight: 600; letter-spacing: 0.06em; line-height: 1; font-variant-numeric: tabular-nums; margin-left: -6px; }
+.pair .how { font-size: 36px; color: var(--dim); margin-top: 36px; font-family: var(--serif); }
+.pair .cbtn { width: 320px; }
+.qr { align-self: center; width: 560px; height: 560px; border-radius: 36px; background: var(--paper); box-shadow: 0 0 150px var(--glow); padding: 44px; }
+.qr svg { width: 100%; height: 100%; display: block; }
+
+/* ---------- 규격 ---------- */
+.spec { display: grid; grid-template-columns: repeat(3, minmax(0, 360px)); gap: 32px; font-size: 14px; line-height: 1.65; }
+.spec h3 { font-size: 14px; margin: 0 0 8px; }
+.spec ul { margin: 0; padding-left: 18px; color: #2A2D32; }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
+
+/* ---------- PNG 내보내기 ---------- */
+html.shot body { padding: 0; background: var(--black); }
+html.shot body > * { display: none; }
+html.shot body > .shot-host { display: block; }
+html.shot .phone { border-radius: 0; }
+</style>
+</head>
+<body>
+
+<svg class="defs" aria-hidden="true">
+  <defs>
+    <g id="g-car" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="13">
+      <path stroke="#30A46C" d="M150 712 q300 -22 620 -6 t690 2"/>
+      <path stroke="#E5484D" d="M420 640 c-22 -72 10 -120 90 -126 l112 -8 c50 -96 120 -136 230 -138 l150 -2 c112 0 170 52 216 140 l120 22 c70 14 86 60 74 112 z"/>
+      <path stroke="#0090FF" d="M668 498 c38 -62 84 -86 150 -90 l8 92 z"/>
+      <path stroke="#0090FF" d="M876 406 l122 -2 c64 4 104 38 132 94 l-250 2 z"/>
+      <circle stroke="#000" cx="602" cy="652" r="60"/>
+      <circle stroke="#000" cx="1182" cy="650" r="62"/>
+    </g>
+    <g id="g-sky" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="13">
+      <path stroke="#FFC53D" d="M1250 186 c0 -50 38 -84 84 -82 c46 2 80 38 78 84 c-2 46 -38 80 -84 78 c-44 -2 -78 -36 -78 -80 z"/>
+      <path stroke="#FFC53D" d="M1332 60 v-28 M1440 104 l22 -22 M1470 190 h30 M1436 282 l22 20 M1330 312 v28 M1226 278 l-22 22 M1196 186 h-30 M1228 96 l-20 -20"/>
+      <path stroke="#E93D82" d="M300 250 c-40 -70 -140 -30 -110 50 c20 55 80 90 110 120 c30 -30 90 -65 110 -120 c30 -80 -70 -120 -110 -50 z"/>
+    </g>
+    <text id="g-text" x="480" y="842" font-family="Pretendard Variable, Pretendard, sans-serif" font-size="74" font-weight="600" fill="#000" letter-spacing="-1">아빠 오늘도 안전운전!</text>
+    <symbol id="art-full" viewBox="0 0 1600 900"><use href="#g-car"/><use href="#g-sky"/><use href="#g-text"/></symbol>
+    <symbol id="art-draw" viewBox="0 0 1600 900"><use href="#g-car"/><use href="#g-sky"/></symbol>
+    <symbol id="art-part" viewBox="0 0 1600 900"><use href="#g-car"/></symbol>
+
+    <symbol id="i-eraser" viewBox="0 0 24 24"><path d="M8.5 19 4 14.5a1.5 1.5 0 0 1 0-2.1l8.4-8.4a1.5 1.5 0 0 1 2.1 0l5.5 5.5a1.5 1.5 0 0 1 0 2.1L12.5 19zM9 8l7 7M8.5 19H20"/></symbol>
+    <symbol id="i-text" viewBox="0 0 24 24"><path d="M5 7V5h14v2M12 5v14M9 19h6"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.5S4 15.6 4 9.6A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 8 2.6c0 6-8 10.9-8 10.9z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></symbol>
+    <symbol id="i-replay" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.6-5.9M4 4.5v4h4"/></symbol>
+  </defs>
+</svg>
+
+<h1 class="board-title">Pleos Postbox 화면 디자인</h1>
+<p class="board-sub">어두운 차 안에 불 켜진 종이 한 장. 종이만 순백이고 둘레로 빛이 조금 번진다. 마음이 담기는 한 줄만 바탕체, 나머지는 Pretendard.</p>
+
+<h2 class="group">쓰기<small>휴대폰 웹, 가로 844×390</small></h2>
+<div class="row">
+
+  <figure class="item"><div class="frame phone" id="w1">
+    <div class="setup">
+      <div class="intro"><div class="brand"><img src="../../web/brand/pleos.svg" alt="Pleos"><span>Postbox</span></div><p>시동을 걸면 도착하는 편지</p></div>
+      <div class="form">
+        <label>가족 코드</label>
+        <div class="cells"><span>K</span><span>7</span><span>Q</span><span>2</span><span class="cur"></span><span></span></div>
+        <div class="help">차 화면에 표시된 6자리</div>
+        <label>이름</label>
+        <div class="input">민준</div>
+        <div class="btn-w off">시작하기</div>
+      </div>
+    </div>
+  </div><figcaption><b>W1 처음 설정</b>QR로 들어오면 코드는 채워져 있다. 둘 다 채워지면 버튼이 흰색으로 켜진다.</figcaption></figure>
+
+  <figure class="item"><div class="frame phone" id="w2">
+    <div class="p-tools">
+      <div class="tool on"><span class="dot" style="--c:#000"></span></div>
+      <div class="tool"><svg><use href="#i-eraser"/></svg></div>
+      <div class="tool"><svg><use href="#i-text"/></svg></div>
+      <div class="tool off"><svg><use href="#i-undo"/></svg></div>
+    </div>
+    <div class="p-paper"><div class="p-hint">오늘의 마음을 그려 주세요</div></div>
+    <div class="p-side"><div class="who">민</div><div class="send off"><i><svg><use href="#i-send"/></svg></i>보내기</div></div>
+  </div><figcaption><b>W2 빈 종이</b>왼쪽 위에서부터 펜(현재 색), 지우개, 글상자, 되돌리기. 오른쪽 위는 보내는 사람. 그리기 전에는 되돌리기와 보내기가 꺼져 있다.</figcaption></figure>
+
+  <figure class="item"><div class="frame phone" id="w3">
+    <div class="p-tools">
+      <div class="tool on"><span class="dot" style="--c:#E5484D"></span></div>
+      <div class="tool"><svg><use href="#i-eraser"/></svg></div>
+      <div class="tool"><svg><use href="#i-text"/></svg></div>
+      <div class="tool"><svg><use href="#i-undo"/></svg></div>
+    </div>
+    <div class="p-paper"><svg class="art"><use href="#art-draw"/></svg></div>
+    <div class="p-side"><div class="who">민</div><div class="send"><i><svg><use href="#i-send"/></svg></i>보내기</div></div>
+  </div><figcaption><b>W3 그리는 중</b>펜 버튼의 점이 지금 색이다. 한 획이라도 있으면 보내기가 켜진다.</figcaption></figure>
+
+  <figure class="item"><div class="frame phone" id="w4">
+    <div class="p-tools">
+      <div class="tool on"><span class="dot" style="--c:#E5484D"></span></div>
+      <div class="tool"><svg><use href="#i-eraser"/></svg></div>
+      <div class="tool"><svg><use href="#i-text"/></svg></div>
+      <div class="tool"><svg><use href="#i-undo"/></svg></div>
+    </div>
+    <div class="p-paper"><svg class="art"><use href="#art-draw"/></svg>
+      <div class="pop">
+        <div class="inks">
+          <span class="ink k" style="--c:#000"></span><span class="ink sel" style="--c:#E5484D"></span><span class="ink" style="--c:#F76B15"></span><span class="ink" style="--c:#FFC53D"></span>
+          <span class="ink" style="--c:#30A46C"></span><span class="ink" style="--c:#0090FF"></span><span class="ink" style="--c:#8E4EC6"></span><span class="ink" style="--c:#E93D82"></span>
+        </div>
+        <div class="widths">
+          <div class="w"><span style="width:6px;height:6px"></span></div>
+          <div class="w sel"><span style="width:11px;height:11px"></span></div>
+          <div class="w"><span style="width:18px;height:18px"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="p-side"><div class="who">민</div><div class="send"><i><svg><use href="#i-send"/></svg></i>보내기</div></div>
+  </div><figcaption><b>W4 색과 굵기</b>켜져 있는 펜을 한 번 더 누르면 열린다. 고르거나 종이를 누르면 닫힌다.</figcaption></figure>
+
+  <figure class="item"><div class="frame phone" id="w5">
+    <div class="p-tools">
+      <div class="tool"><span class="dot" style="--c:#000"></span></div>
+      <div class="tool"><svg><use href="#i-eraser"/></svg></div>
+      <div class="tool on"><svg><use href="#i-text"/></svg></div>
+      <div class="tool"><svg><use href="#i-undo"/></svg></div>
+    </div>
+    <div class="p-paper"><svg class="art"><use href="#art-draw"/></svg>
+      <div class="ghost-text">아빠 오늘도 안전운전!</div>
+      <div class="textbar">아빠 오늘도 안전운전!<i class="caret"></i><b>완료</b></div>
+    </div>
+    <div class="p-side"><div class="who">민</div><div class="send"><i><svg><use href="#i-send"/></svg></i>보내기</div></div>
+  </div><figcaption><b>W5 글상자</b>글상자를 켜고 종이를 누르면 그 자리에 글이 놓인다. 입력줄은 키보드에 가리지 않게 종이 위쪽에 뜬다(최대 40자).</figcaption></figure>
+
+  <figure class="item"><div class="frame phone" id="w6">
+    <div class="p-tools">
+      <div class="tool on"><span class="dot" style="--c:#000"></span></div>
+      <div class="tool"><svg><use href="#i-eraser"/></svg></div>
+      <div class="tool"><svg><use href="#i-text"/></svg></div>
+      <div class="tool off"><svg><use href="#i-undo"/></svg></div>
+    </div>
+    <div class="p-paper">
+      <div class="toast"><svg><use href="#i-check"/></svg>보냈어요<span>다음 시동 때 도착해요</span></div>
+    </div>
+    <div class="p-side"><div class="who">민</div><div class="send off"><i><svg><use href="#i-send"/></svg></i>보내기</div></div>
+  </div><figcaption><b>W6 보냄</b>그림이 위로 빠져나가고 새 종이가 남는다. 알림은 3초 뒤 사라진다. 실패하면 그림은 그대로 두고 같은 자리에 "보내지 못했어요. 다시 눌러 주세요".</figcaption></figure>
+
+  <figure class="item"><div class="frame phone portrait" id="w7">
+    <div class="rotate">
+      <svg viewBox="0 0 64 64"><rect x="22" y="10" width="20" height="36" rx="4"/><path d="M14 50a22 22 0 0 0 36 0"/><path d="m46 44 4 6 6-3"/></svg>
+      가로로 돌려 주세요
+    </div>
+  </div><figcaption><b>W7 세로일 때</b>설정이 끝난 뒤 세로로 들면 보인다.</figcaption></figure>
+</div>
+
+<h2 class="group">받기<small>차량 Pleos Connect, 1920×1080. 운전석에서 가까운 왼쪽에 버튼</small></h2>
+<div class="row">
+
+  <figure class="item"><div class="scale-car"><div class="frame car" id="c1">
+    <div class="pair">
+      <div class="left">
+        <div class="brand"><img src="../../web/brand/pleos.svg" alt="Pleos"><span>Postbox</span></div>
+        <div>
+          <div class="label">가족 코드</div>
+          <div class="code">K7Q2MX</div>
+          <div class="how">휴대폰으로 QR을 찍으면 편지를 보낼 수 있어요</div>
+        </div>
+        <div class="cbtn pri">확인</div>
+      </div>
+      <div class="qr"><svg id="qr" viewBox="0 0 29 29" shape-rendering="crispEdges"></svg></div>
+    </div>
+  </div></div><figcaption><b>C1 가족 연결</b>처음 실행할 때, 그리고 '가족 초대'를 눌렀을 때.</figcaption></figure>
+
+  <figure class="item"><div class="scale-car"><div class="frame car" id="c2">
+    <div class="c-rail"><div class="brand"><img src="../../web/brand/pleos.svg" alt="Pleos"><span>Postbox</span></div><div class="cbtn">가족 초대</div></div>
+    <div class="c-paper none"></div>
+    <div class="c-cap"><span class="name">아직 도착한 편지가 없어요</span></div>
+  </div></div><figcaption><b>C2 편지 없음</b>네트워크가 없으면 아래 글만 "연결되면 편지를 가져올게요"로 바뀐다.</figcaption></figure>
+
+  <figure class="item"><div class="scale-car"><div class="frame car" id="c3">
+    <div class="c-under"></div>
+    <div class="c-paper closed"><svg class="flap" viewBox="0 0 1536 864" preserveAspectRatio="none"><path d="M2 34 L768 430 L1534 34"/></svg><div class="seal"><svg><use href="#i-heart"/></svg></div></div>
+    <div class="c-cap"><span class="name">편지 두 통이 기다리고 있어요</span><span class="meta">주차하면 열려요</span></div>
+  </div></div><figcaption><b>C3 주행 중 잠금</b>P가 아니면 항상 이 화면. 닫힌 봉투 모양이고, 한 통이면 뒤에 겹친 장이 없다. 버튼도 움직임도 없다. 재생 중에 출발해도 바로 이 화면으로 바뀐다.</figcaption></figure>
+
+  <figure class="item"><div class="scale-car"><div class="frame car" id="c4">
+    <div class="c-rail"><div class="cbtn">다음 편지</div><div class="cbtn pri">답장</div></div>
+    <div class="c-paper"><svg class="art"><use href="#art-part"/></svg><div class="c-bar" style="width:46%"></div></div>
+    <div class="c-cap"><span class="name">민준</span><span class="meta">오늘 아침 8:12</span><span class="count">1 / 2</span></div>
+  </div></div><figcaption><b>C4 편지 열림, 재생 중</b>주차하면 봉투가 종이로 밝아지며 그린 순서대로 다시 그려진다(최대 8초). 시각은 아침·낮·저녁·밤으로 풀어 쓴다. 종이 아래 가는 줄이 진행 정도. 재생 중에도 버튼은 눌린다.</figcaption></figure>
+
+  <figure class="item"><div class="scale-car"><div class="frame car" id="c5">
+    <div class="c-rail"><div class="cbtn plain top"><svg><use href="#i-replay"/></svg>다시 보기</div><div class="cbtn">다음 편지</div><div class="cbtn pri">답장</div></div>
+    <div class="c-paper"><svg class="art"><use href="#art-full"/></svg></div>
+    <div class="c-cap"><span class="name">민준</span><span class="meta">오늘 아침 8:12</span><span class="count">1 / 2</span></div>
+  </div></div><figcaption><b>C5 재생 끝</b>진행 줄이 사라지고 '다시 보기'가 생긴다. 마지막 편지에서는 '다음 편지' 대신 '닫기'.</figcaption></figure>
+
+  <figure class="item"><div class="scale-car"><div class="frame car" id="c6">
+    <div class="c-rail"><div class="cbtn plain top">취소</div><div class="cbtn">고마워</div><div class="cbtn">사랑해</div><div class="cbtn">곧 갈게</div><div class="cbtn">♥</div><div class="cbtn pri"><svg><use href="#i-mic"/></svg>말하기</div></div>
+    <div class="c-paper"><svg class="art"><use href="#art-full"/></svg></div>
+    <div class="c-cap"><span class="name">민준에게 답장</span></div>
+  </div></div><figcaption><b>C6 답장 고르기</b>네 가지 중 하나를 누르면 바로 보내진다. '말하기'는 음성 답장.</figcaption></figure>
+
+  <figure class="item"><div class="scale-car"><div class="frame car" id="c7">
+    <div class="c-rail">
+      <div class="listen"><span style="height:20px"></span><span style="height:44px"></span><span style="height:68px"></span><span style="height:36px"></span><span style="height:56px"></span><span style="height:24px"></span></div>
+      <div class="cbtn plain">취소</div><div class="cbtn">다시 말하기</div><div class="cbtn pri">보내기</div></div>
+    <div class="c-paper"><svg class="art"><use href="#art-full"/></svg></div>
+    <div class="c-cap"><span class="name">“조금 늦어, 먼저 먹고 있어”</span></div>
+  </div></div><figcaption><b>C7 음성 답장</b>듣는 동안 아래 글은 "듣고 있어요"이고 '보내기'는 꺼져 있다. 인식되면 문장이 그 자리에 나온다.</figcaption></figure>
+
+  <figure class="item"><div class="scale-car"><div class="frame car" id="c8">
+    <div class="c-rail"><div class="brand"><img src="../../web/brand/pleos.svg" alt="Pleos"><span>Postbox</span></div><div class="cbtn plain"><svg><use href="#i-replay"/></svg>다시 보기</div><div class="cbtn">가족 초대</div></div>
+    <div class="c-paper"><svg class="art"><use href="#art-full"/></svg></div>
+    <div class="c-cap"><span class="name">민준</span><span class="meta">“고마워”라고 답장했어요</span></div>
+  </div></div><figcaption><b>C8 다 읽음</b>마지막 편지가 화면에 남는다. 답장 없이 닫았으면 보낸 시각만 보인다.</figcaption></figure>
+</div>
+
+<h2 class="group">규격</h2>
+<div class="spec">
+  <div><h3>색과 글꼴</h3><ul>
+    <li><span class="sw" style="background:#0C0B0A"></span>바탕 #0C0B0A</li>
+    <li><span class="sw" style="background:#fff"></span>종이 #FFFFFF, 둘레 빛 rgba(255,221,184,.13)</li>
+    <li><span class="sw" style="background:#F6F1E9"></span>글자, 주 버튼 #F6F1E9</li>
+    <li><span class="sw" style="background:#1D1B19"></span>보조 버튼, 패널 #1D1B19</li>
+    <li><span class="sw" style="background:#36322E"></span>선 #36322E</li>
+    <li><span class="sw" style="background:#A9A198"></span>보조 글자 #A9A198</li>
+    <li>펜 8색: #000000 #E5484D #F76B15 #FFC53D #30A46C #0090FF #8E4EC6 #E93D82</li>
+    <li>바탕체(Gowun Batang): 종이 아래 한 줄, 빈 종이 안내, 소개 문장. 그 밖은 Pretendard</li>
+  </ul></div>
+  <div><h3>쓰기 (844×390 기준)</h3><ul>
+    <li>글꼴 Pretendard. 본문 15~16, 보조 12~13</li>
+    <li>종이 16:9, 위아래 여백 10, 모서리 18. 남는 좌우를 반씩 도구줄로</li>
+    <li>도구 버튼 지름 48 원, 간격 8. 켜짐은 흰 바탕에 검은 아이콘</li>
+    <li>보내기 지름 56 흰 원. 꺼짐은 #1D1B19</li>
+    <li>펜 굵기 3단: 종이 너비의 0.4% / 0.8% / 1.6%</li>
+  </ul></div>
+  <div><h3>받기 (1920×1080 기준)</h3><ul>
+    <li>글자 최소 34, 종이 아래 한 줄은 바탕체 50 굵게. 문구는 한 줄</li>
+    <li>바깥 여백 48. 버튼줄 너비 240(왼쪽), 종이 1536×864 모서리 28</li>
+    <li>버튼 240×104 알약 모양, 간격 16. 주 버튼은 맨 아래 흰색</li>
+    <li>종이 아래 120 높이 한 줄: 보낸 사람, 시각, 오른쪽 끝에 순서</li>
+    <li>잠금 화면은 정지 화면. 애니메이션 없음</li>
+  </ul></div>
+</div>
+
+<script>
+// 장식용 QR(실제 코드 아님). 고정 난수로 매번 같은 모양.
+(function () {
+  const n = 29, svg = document.getElementById("qr"); let s = 7, out = "";
+  const rnd = () => (s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  const finder = (x, y) => [[0, 0], [n - 7, 0], [0, n - 7]].some(([fx, fy]) => x >= fx - 1 && x < fx + 8 && y >= fy - 1 && y < fy + 8);
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (!finder(x, y) && rnd() > 0.52) out += `<rect x="${x}" y="${y}" width="1" height="1"/>`;
+  for (const [fx, fy] of [[0, 0], [n - 7, 0], [0, n - 7]])
+    out += `<path fill-rule="evenodd" d="M${fx} ${fy}h7v7h-7zM${fx + 1} ${fy + 1}v5h5v-5z"/><rect x="${fx + 2}" y="${fy + 2}" width="3" height="3"/>`;
+  svg.innerHTML = out;
+})();
+// ?shot=c4 → 그 화면만 원래 크기로
+(function () {
+  const id = new URLSearchParams(location.search).get("shot"); if (!id) return;
+  const el = document.getElementById(id); if (!el) return;
+  const host = document.createElement("div"); host.className = "shot-host"; host.appendChild(el);
+  document.body.appendChild(host); document.documentElement.classList.add("shot");
+})();
+</script>
+</body>
+</html>
