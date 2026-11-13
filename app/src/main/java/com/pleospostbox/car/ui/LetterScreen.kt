@@ -41,19 +41,25 @@ import com.pleospostbox.replay.replayDurationMs
 /** 편지 뷰 위쪽에 띄울 것. */
 data class LetterHeader(val name: String, val meta: String?, val position: String?)
 
+/** 그린 시간보다 이만큼 빠르게 다시 그린다. */
+private const val REPLAY_SPEED = 1.3f
+
 /**
- * V1·V2·V5: 화면 가득한 편지. 처음 열면 그린 순서대로 다시 그린다.
+ * 화면 가득한 편지. 처음 열면 그린 순서대로 다시 그린다.
  * played에 들어 있는 편지는 다 그린 모습으로 바로 보여준다(답장 취소로 돌아왔을 때 등).
+ * onPrev·onNext가 null이면 그쪽 끝이라 버튼이 꺼진다.
  */
 @Composable
 fun LetterScreen(
     letter: Letter,
     header: LetterHeader,
     played: MutableSet<String>,
-    onBack: () -> Unit,
+    onToArchive: () -> Unit,
+    onPrev: (() -> Unit)?,
+    onNext: (() -> Unit)?,
     onReply: (() -> Unit)?,
 ) {
-    val duration = remember(letter.id) { replayDurationMs(letter.strokes, letter.texts) }
+    val duration = remember(letter.id) { (replayDurationMs(letter.strokes, letter.texts) / REPLAY_SPEED).toLong() }
     var token by remember(letter.id) { mutableIntStateOf(0) }
     val elapsed = remember(letter.id, token) {
         Animatable(if (token == 0 && letter.id in played) duration.toFloat() else 0f)
@@ -67,10 +73,10 @@ fun LetterScreen(
     var saving by remember(letter.id) { mutableStateOf(false) }
 
     Box(Modifier.fillMaxSize()) {
-        LetterCanvas(letter, if (playing) elapsed.value.toLong() else null, Modifier.fillMaxSize())
+        LetterCanvas(letter, if (playing) (elapsed.value * REPLAY_SPEED).toLong() else null, Modifier.fillMaxSize())
 
         Row(Modifier.padding(40.u), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.u)) {
-            RoundIconButton(R.drawable.ic_back, stringResource(R.string.back), onBack)
+            PillButton(stringResource(R.string.to_archive), onToArchive, icon = R.drawable.ic_back)
             InfoChip(header.name, header.meta)
         }
         if (header.position != null) GlassChip(header.position, Modifier.align(Alignment.TopEnd).padding(40.u))
@@ -90,6 +96,11 @@ fun LetterScreen(
                 }
                 RoundIconButton(R.drawable.ic_download, stringResource(R.string.save), { saving = true })
             }
+        }
+
+        Row(Modifier.align(Alignment.BottomEnd).padding(40.u), horizontalArrangement = Arrangement.spacedBy(16.u)) {
+            RoundIconButton(R.drawable.ic_back, stringResource(R.string.prev), { onPrev?.invoke() }, enabled = onPrev != null)
+            RoundIconButton(R.drawable.ic_next, stringResource(R.string.next), { onNext?.invoke() }, enabled = onNext != null)
         }
 
         if (playing && duration > 0) {
@@ -170,6 +181,8 @@ fun ReplyScreen(
                     look = Look.GlassPrimary, enabled = heard != null,
                 )
             }
+            // 답장 버튼이 있던 자리(맨 아래)는 늘 취소
+            PillButton(stringResource(R.string.cancel), back, Modifier.fillMaxWidth())
         }
 
         if (voice) {

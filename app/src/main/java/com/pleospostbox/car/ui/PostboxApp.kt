@@ -16,6 +16,7 @@ import com.pleospostbox.car.CarViewModel
 import com.pleospostbox.car.R
 import com.pleospostbox.car.vehicle.SpeechInput
 import com.pleospostbox.screen.CarScreenState
+import com.pleospostbox.screen.LetterSource
 import java.time.ZoneId
 
 @Composable
@@ -37,34 +38,23 @@ fun PostboxApp(vm: CarViewModel, speech: SpeechInput, now: () -> Long) {
                     CarScreenState.Empty -> EmptyScreen(vm::showPairing)
                     is CarScreenState.Locked -> LockedScreen(s.newCount)
                     CarScreenState.Archive -> ArchiveScreen(model.archive, now(), zone, vm::open, vm::showPairing)
-                    is CarScreenState.Revealing -> {
+                    is CarScreenState.Reading -> {
+                        val l = s.letter
+                        val reply = s.reply
+                        val meta = if (reply != null) stringResource(R.string.replied, textGlyphs(reply))
+                        else TimeLabels.meta(l.createdAt, now(), zone)
+                        val position = if (s.source == LetterSource.NEW && s.total > 1) "${s.index + 1} / ${s.total}" else null
                         LetterScreen(
-                            s.letter,
-                            LetterHeader(s.letter.senderName, TimeLabels.meta(s.letter.createdAt, now(), zone),
-                                if (s.total > 1) "${s.index} / ${s.total}" else null),
-                            played, vm::back, vm::requestReply,
+                            l, LetterHeader(l.senderName, meta, position), played,
+                            onToArchive = vm::toArchive,
+                            onPrev = if (s.olderIndex != null) vm::prev else null,
+                            onNext = if (s.newerIndex != null) vm::next else null,
+                            onReply = if (s.reply == null) vm::requestReply else null,
                         )
-                        BackHandler { vm.back() }
-                    }
-                    is CarScreenState.Viewing -> {
-                        LetterScreen(
-                            s.letter,
-                            LetterHeader(s.letter.senderName, TimeLabels.meta(s.letter.createdAt, now(), zone), null),
-                            played, vm::back, vm::requestReply,
-                        )
-                        BackHandler { vm.back() }
-                    }
-                    is CarScreenState.Replied -> {
-                        played += s.letter.id
-                        LetterScreen(
-                            s.letter,
-                            LetterHeader(s.letter.senderName, stringResource(R.string.replied, textGlyphs(s.reply)), null),
-                            played, vm::back, null,
-                        )
-                        BackHandler { vm.back() }
+                        BackHandler { vm.toArchive() }
                     }
                     is CarScreenState.Replying -> {
-                        ReplyScreen(s.letter, speech, vm::cancelReply, vm::sendReply)
+                        ReplyScreen(s.reading.letter, speech, vm::cancelReply, vm::sendReply)
                         BackHandler { vm.cancelReply() }
                     }
                 }

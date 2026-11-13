@@ -1,7 +1,11 @@
 package com.pleospostbox.screen
 
 import com.pleospostbox.letter.Letter
+import com.pleospostbox.screen.CarScreenState.Reading
+import com.pleospostbox.screen.LetterSource.ARCHIVE
+import com.pleospostbox.screen.LetterSource.NEW
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CarScreenTest {
@@ -19,100 +23,100 @@ class CarScreenTest {
         assertEquals(CarScreenState.Empty, start(DriveState.DRIVING, emptyList()).screen)
     }
 
-    @Test fun parked_with_new_letters_reveals_first_with_position() {
-        assertEquals(CarScreenState.Revealing(a, index = 1, total = 2), start(DriveState.PARKED, listOf(a, b)).screen)
+    @Test fun parked_with_new_letters_reads_first_and_marks_it_seen() {
+        val m = start(DriveState.PARKED, listOf(a, b))
+        assertEquals(Reading(a, NEW, index = 0, total = 2), m.screen)
+        assertEquals(setOf("a"), m.seen)
     }
 
-    @Test fun parked_with_only_archive_shows_archive_newest_first() {
-        val m = start(DriveState.PARKED, emptyList(), listOf(old1, old2))
+    @Test fun archive_holds_new_and_old_letters_newest_first() {
+        val m = start(DriveState.PARKED, listOf(a, b), listOf(old1, old2))
+        assertEquals(listOf(b, a, old2, old1), m.archive)
+    }
+
+    @Test fun parked_with_only_archive_shows_archive() {
+        assertEquals(CarScreenState.Archive, start(DriveState.PARKED, emptyList(), listOf(old1)).screen)
+    }
+
+    @Test fun next_is_newer_and_prev_is_older_inside_new_letters() {
+        var m = start(DriveState.PARKED, listOf(a, b))
+        m = reduce(m, CarEvent.Next)
+        assertEquals(Reading(b, NEW, index = 1, total = 2), m.screen)
+        assertEquals(setOf("a", "b"), m.seen)
+        assertEquals(m, reduce(m, CarEvent.Next)) // 마지막에서는 그대로
+        m = reduce(m, CarEvent.Prev)
+        assertEquals(Reading(a, NEW, index = 0, total = 2), m.screen)
+        assertEquals(m, reduce(m, CarEvent.Prev)) // 처음에서는 그대로
+    }
+
+    @Test fun to_archive_goes_straight_to_list() {
+        var m = start(DriveState.PARKED, listOf(a, b), listOf(old1))
+        m = reduce(m, CarEvent.ToArchive)
         assertEquals(CarScreenState.Archive, m.screen)
-        assertEquals(listOf(old2, old1), m.archive)
+        assertEquals(setOf("a"), m.seen) // b는 보지 않았다
     }
 
-    @Test fun not_parked_locks_with_new_count() {
+    @Test fun archive_prev_is_older_next_is_newer() {
+        var m = start(DriveState.PARKED, emptyList(), listOf(old1, old2))
+        m = reduce(m, CarEvent.Open(old2))
+        assertEquals(Reading(old2, ARCHIVE, index = 0, total = 2), m.screen)
+        assertEquals(m, reduce(m, CarEvent.Next)) // 가장 최근 편지라 더 최근은 없다
+        m = reduce(m, CarEvent.Prev) // 더 이전 편지
+        assertEquals(Reading(old1, ARCHIVE, index = 1, total = 2), m.screen)
+        m = reduce(m, CarEvent.Next)
+        assertEquals(Reading(old2, ARCHIVE, index = 0, total = 2), m.screen)
+        m = reduce(m, CarEvent.ToArchive)
+        assertEquals(CarScreenState.Archive, m.screen)
+    }
+
+    @Test fun opening_unseen_new_letter_from_archive_marks_it_seen() {
+        var m = reduce(start(DriveState.PARKED, listOf(a, b)), CarEvent.ToArchive)
+        m = reduce(m, CarEvent.Open(b))
+        assertTrue("b" in m.seen)
+    }
+
+    @Test fun reply_flow_returns_to_same_letter_with_reply() {
+        var m = start(DriveState.PARKED, listOf(a, b))
+        m = reduce(m, CarEvent.ReplyRequested)
+        val reading = Reading(a, NEW, index = 0, total = 2)
+        assertEquals(CarScreenState.Replying(reading), m.screen)
+        assertEquals(reading, reduce(m, CarEvent.ReplyCancelled).screen)
+        m = reduce(m, CarEvent.ReplySent("고마워"))
+        assertEquals(reading.copy(reply = "고마워"), m.screen)
+        m = reduce(m, CarEvent.Next)
+        assertEquals(Reading(b, NEW, index = 1, total = 2), m.screen) // 다음 편지에는 답장 표시가 없다
+    }
+
+    @Test fun not_parked_locks_with_unseen_count() {
         assertEquals(CarScreenState.Locked(2), start(DriveState.DRIVING, listOf(a, b)).screen)
         assertEquals(CarScreenState.Locked(2), start(DriveState.IDLING, listOf(a, b)).screen)
         assertEquals(CarScreenState.Locked(0), start(DriveState.DRIVING, emptyList(), listOf(old1)).screen)
+        assertEquals(emptySet<String>(), start(DriveState.DRIVING, listOf(a)).seen)
     }
 
-    @Test fun driving_during_reveal_locks_and_restarts_later() {
+    @Test fun driving_mid_letters_locks_with_remaining_then_resumes_first_unseen() {
         var m = start(DriveState.PARKED, listOf(a, b))
         m = reduce(m, CarEvent.DriveChanged(DriveState.DRIVING))
-        assertEquals(CarScreenState.Locked(2), m.screen)
+        assertEquals(CarScreenState.Locked(1), m.screen)
         m = reduce(m, CarEvent.DriveChanged(DriveState.PARKED))
-        assertEquals(CarScreenState.Revealing(a, index = 1, total = 2), m.screen)
+        assertEquals(Reading(b, NEW, index = 1, total = 2), m.screen)
+    }
+
+    @Test fun parking_with_everything_seen_shows_archive() {
+        var m = reduce(start(DriveState.PARKED, listOf(a)), CarEvent.DriveChanged(DriveState.DRIVING))
+        m = reduce(m, CarEvent.DriveChanged(DriveState.PARKED))
+        assertEquals(CarScreenState.Archive, m.screen)
     }
 
     @Test fun parked_again_keeps_current_screen() {
-        var m = start(DriveState.PARKED, listOf(a))
-        m = reduce(m, CarEvent.ReplyRequested)
+        val m = reduce(start(DriveState.PARKED, listOf(a)), CarEvent.ReplyRequested)
         assertEquals(m, reduce(m, CarEvent.DriveChanged(DriveState.PARKED)))
     }
 
-    @Test fun back_moves_to_next_new_letter_then_archive() {
-        var m = start(DriveState.PARKED, listOf(a, b), listOf(old1))
-        m = reduce(m, CarEvent.Back)
-        assertEquals(CarScreenState.Revealing(b, index = 2, total = 2), m.screen)
-        m = reduce(m, CarEvent.Back)
-        assertEquals(CarScreenState.Archive, m.screen)
-        assertEquals(listOf(b, a, old1), m.archive)
-        assertEquals(emptyList<Letter>(), m.queue)
-    }
-
-    @Test fun reply_to_new_letter_opens_next_or_shows_replied_on_last() {
-        var m = start(DriveState.PARKED, listOf(a, b))
-        m = reduce(m, CarEvent.ReplyRequested)
-        assertEquals(CarScreenState.Replying(a, fromArchive = false), m.screen)
-        m = reduce(m, CarEvent.ReplySent("고마워"))
-        assertEquals(CarScreenState.Revealing(b, index = 2, total = 2), m.screen)
-        m = reduce(m, CarEvent.ReplyRequested)
-        m = reduce(m, CarEvent.ReplySent("사랑해"))
-        assertEquals(CarScreenState.Replied(b, "사랑해"), m.screen)
-        m = reduce(m, CarEvent.Back)
-        assertEquals(CarScreenState.Archive, m.screen)
-    }
-
-    @Test fun reply_cancel_returns_to_where_it_came_from() {
-        var m = reduce(start(DriveState.PARKED, listOf(a)), CarEvent.ReplyRequested)
-        m = reduce(m, CarEvent.ReplyCancelled)
-        assertEquals(CarScreenState.Revealing(a, index = 1, total = 1), m.screen)
-
-        m = start(DriveState.PARKED, emptyList(), listOf(old1))
-        m = reduce(reduce(m, CarEvent.Open(old1)), CarEvent.ReplyRequested)
-        assertEquals(CarScreenState.Replying(old1, fromArchive = true), m.screen)
-        m = reduce(m, CarEvent.ReplyCancelled)
-        assertEquals(CarScreenState.Viewing(old1), m.screen)
-    }
-
-    @Test fun open_from_archive_and_back() {
-        var m = start(DriveState.PARKED, emptyList(), listOf(old1, old2))
-        m = reduce(m, CarEvent.Open(old1))
-        assertEquals(CarScreenState.Viewing(old1), m.screen)
-        m = reduce(m, CarEvent.Back)
-        assertEquals(CarScreenState.Archive, m.screen)
-    }
-
-    @Test fun reply_to_archived_letter_shows_replied() {
-        var m = start(DriveState.PARKED, emptyList(), listOf(old1))
-        m = reduce(reduce(m, CarEvent.Open(old1)), CarEvent.ReplyRequested)
-        m = reduce(m, CarEvent.ReplySent("♥"))
-        assertEquals(CarScreenState.Replied(old1, "♥"), m.screen)
-        assertEquals(listOf(old1), m.archive)
-    }
-
-    @Test fun nothing_opens_or_replies_while_driving() {
+    @Test fun nothing_works_while_driving() {
         val m = start(DriveState.DRIVING, listOf(a), listOf(old1))
-        assertEquals(m, reduce(m, CarEvent.ReplyRequested))
-        assertEquals(m, reduce(m, CarEvent.Open(old1)))
-        assertEquals(m, reduce(m, CarEvent.Back))
-    }
-
-    @Test fun driving_while_viewing_archive_locks_then_returns_to_archive() {
-        var m = start(DriveState.PARKED, emptyList(), listOf(old1))
-        m = reduce(m, CarEvent.Open(old1))
-        m = reduce(m, CarEvent.DriveChanged(DriveState.DRIVING))
-        assertEquals(CarScreenState.Locked(0), m.screen)
-        m = reduce(m, CarEvent.DriveChanged(DriveState.PARKED))
-        assertEquals(CarScreenState.Archive, m.screen)
+        for (e in listOf(CarEvent.ReplyRequested, CarEvent.Open(old1), CarEvent.Next, CarEvent.ToArchive)) {
+            assertEquals(m, reduce(m, e))
+        }
     }
 }

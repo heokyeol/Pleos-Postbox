@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * 앱이 시작되면 시동이 걸린 것으로 보고, 시동 전에 도착한 안 읽은 편지를 보여준다.
- * 화면 흐름은 core의 reduce가 정하고, 여기서는 읽음·답장을 저장소에 기록한다.
+ * 화면 흐름은 core의 reduce가 정하고, 여기서는 읽음(화면에 띄운 편지)·답장을 저장소에 기록한다.
  */
 class CarViewModel(
     private val repo: LetterRepository,
@@ -58,7 +58,9 @@ class CarViewModel(
         dispatch(CarEvent.DriveChanged(s ?: systemDrive))
     }
 
-    fun back() = dispatch(CarEvent.Back)
+    fun toArchive() = dispatch(CarEvent.ToArchive)
+    fun prev() = dispatch(CarEvent.Prev)
+    fun next() = dispatch(CarEvent.Next)
     fun open(letter: Letter) = dispatch(CarEvent.Open(letter))
     fun requestReply() = dispatch(CarEvent.ReplyRequested)
     fun cancelReply() = dispatch(CarEvent.ReplyCancelled)
@@ -66,7 +68,7 @@ class CarViewModel(
     /** preset=true면 원터치 답장, false면 음성으로 받아쓴 문장. */
     fun sendReply(text: String, preset: Boolean) {
         val s = _model.value.screen as? CarScreenState.Replying ?: return
-        repo.sendReply(Reply(s.letter.id, preset = text.takeIf { preset }, text = text.takeIf { !preset }))
+        repo.sendReply(Reply(s.reading.letter.id, preset = text.takeIf { preset }, text = text.takeIf { !preset }))
         dispatch(CarEvent.ReplySent(text))
     }
 
@@ -89,10 +91,8 @@ class CarViewModel(
     private fun dispatch(event: CarEvent) {
         val before = _model.value
         val after = reduce(before, event)
-        if (event !is CarEvent.LettersReady) {
-            val left = before.queue.filter { b -> after.queue.none { it.id == b.id } }
-            left.forEach { repo.markOpened(it.id, now()) }
-        }
+        // 화면에 띄운 새 편지는 읽은 것으로 기록한다
+        (after.seen - before.seen).forEach { repo.markOpened(it, now()) }
         _model.value = after
     }
 }

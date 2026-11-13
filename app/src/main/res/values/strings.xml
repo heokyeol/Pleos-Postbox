@@ -4,8 +4,8 @@
     <string name="brand">플레오스 우체통</string>
 
     <!-- 가족 연결 -->
-    <string name="pair_label">가족 코드</string>
-    <string name="pair_how">휴대폰으로 QR을 찍으면 편지를 보낼 수 있어요</string>
+    <string name="pair_label">우체통 주소</string>
+    <string name="pair_how">QR을 찍으면 휴대폰과 우체통이 연결돼요</string>
     <string name="pair_confirm">확인</string>
     <!-- 휴대폰 웹 주소. 웹을 배포하면 실제 주소로 바꾼다. 뒤에 ?code=가족코드 가 붙는다. -->
     <string name="web_url" translatable="false">https://pleos-postbox.example/</string>
@@ -22,6 +22,9 @@
 
     <!-- 편지 보기 -->
     <string name="back">뒤로</string>
+    <string name="to_archive">목록으로</string>
+    <string name="prev">이전 편지</string>
+    <string name="next">다음 편지</string>
     <string name="replay">다시 보기</string>
     <string name="reply">답장</string>
     <string name="reply_to">%1$s에게 답장</string>

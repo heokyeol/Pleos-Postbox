@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -64,13 +65,20 @@ fun PillButton(
 
 /** 아이콘만 있는 원형 버튼(뒤로, 다시 보기). */
 @Composable
-fun RoundIconButton(@DrawableRes icon: Int, label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun RoundIconButton(
+    @DrawableRes icon: Int,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
     Box(
         modifier
             .size(104.u)
+            .alpha(if (enabled) 1f else 0.35f)
             .clip(CircleShape)
             .background(Ink.Glass)
-            .clickable(onClickLabel = label, onClick = onClick),
+            .clickable(enabled = enabled, onClickLabel = label, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Image(painterResource(icon), label, Modifier.size(42.u), colorFilter = ColorFilter.tint(Ink.White))

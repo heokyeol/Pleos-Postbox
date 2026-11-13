@@ -31,10 +31,14 @@ import com.pleospostbox.car.R
 import com.pleospostbox.letter.Letter
 import java.time.ZoneId
 
-/** V7 받은 편지함: 날짜별로 묶어 최신순. 썸네일 아래 보낸 사람(크게)과 시각(작게). */
+/**
+ * 받은 편지함: 날짜 묶음은 최신 날짜가 위, 같은 날짜 안에서는 오른쪽으로 갈수록 늦게 온 편지.
+ * 썸네일 아래 보낸 사람(크게)과 시각(작게).
+ */
 @Composable
 fun ArchiveScreen(letters: List<Letter>, nowMs: Long, zone: ZoneId, onOpen: (Letter) -> Unit, onInvite: () -> Unit) {
-    val groups = remember(letters, zone) { letters.groupBy { TimeLabels.localDate(it.createdAt, zone) } }
+    val groups = remember(letters, zone) { letters.groupBy { TimeLabels.localDate(it.createdAt, zone) }
+        .mapValues { (_, day) -> day.sortedBy { it.createdAt } } }
     val today = TimeLabels.localDate(nowMs, zone)
     Column(Modifier.fillMaxSize().background(Ink.Black)) {
         Row(
