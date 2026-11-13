@@ -1,4 +1,4 @@
--- 시동편지 Supabase 스키마. Supabase 대시보드 > SQL Editor에서 한 번 실행한다.
+-- Pleos Postbox Supabase 스키마. Supabase 대시보드 > SQL Editor에서 한 번 실행한다.
 -- 보안 한계(시연용): 가족 코드가 사실상 비밀번호다. anon key는 공개 전제이므로
 -- 코드를 아는 사람은 그 가족의 편지를 읽을 수 있다. 정식 출시 전에는 인증을 붙인다.
 

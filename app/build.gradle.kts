@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.sidongletter.car"
+    namespace = "com.pleospostbox.car"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.sidongletter.car"
+        applicationId = "com.pleospostbox.car"
         minSdk = 28
         targetSdk = 34
         versionCode = 1

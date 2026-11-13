@@ -11,6 +11,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "sidong-letter"
+rootProject.name = "Pleos-Postbox"
 include(":core")
 include(":app")
