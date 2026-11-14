@@ -92,6 +92,16 @@ def flower(p, cx, cy, color):
     p.stroke(circle(cx, cy, 22, n=16), INK["yellow"])
 
 
+def from_image(id_, sender, created, opened, image):
+    """dummy-input/의 선 그림 이미지를 획으로 바꿔 편지로 (tools/image_to_letter.py)."""
+    import sys
+    sys.path.insert(0, os.path.dirname(__file__))
+    from image_to_letter import convert
+    body = convert(os.path.join(os.path.dirname(__file__), "..", "dummy-input", image))
+    return {"id": id_, "family_code": "K7Q2MX", "sender_name": sender, "created_at": created,
+            "opened_at": opened, **body}
+
+
 def letter(id_, sender, created, opened, draw):
     p = Pen()
     draw(p)
@@ -138,12 +148,13 @@ def l_old_house(p):
 
 
 letters = [
-    letter("dummy-1", "엄마", "2026-11-10T14:30:00+09:00", "2026-11-10T18:40:00+09:00", l_old_mom),
+    letter("dummy-1", "지우민준엄마❤️", "2026-11-10T14:30:00+09:00", "2026-11-10T18:40:00+09:00", l_old_mom),
     letter("dummy-2", "민준", "2026-11-10T18:05:00+09:00", "2026-11-11T08:10:00+09:00", l_old_car),
     letter("dummy-3", "지우", "2026-11-10T08:01:00+09:00", "2026-11-10T18:40:00+09:00", l_old_flowers),
-    letter("dummy-4", "엄마", "2026-11-11T16:20:00+09:00", "2026-11-11T18:30:00+09:00", l_old_house),
+    letter("dummy-4", "지우민준엄마❤️", "2026-11-11T16:20:00+09:00", "2026-11-11T18:30:00+09:00", l_old_house),
     letter("dummy-5", "지우", "2026-11-12T19:40:00+09:00", None, l_new_sky),
     letter("dummy-6", "민준", "2026-11-12T20:12:00+09:00", None, l_new_car),
+    from_image("dummy-7", "지우", "2026-11-12T21:05:00+09:00", None, "더미1.png"),
 ]
 
 out = os.path.join(os.path.dirname(__file__), "..", "app", "src", "main", "assets", "letters.json")
