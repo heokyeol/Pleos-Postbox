@@ -149,7 +149,6 @@ body.mode-text #paper { cursor: text; }
 .icon-btn[aria-pressed="true"] svg { stroke: #fff; }
 .icon-btn:active, .width:active { background: var(--hover); }
 .icon-btn:disabled { opacity: .3; cursor: default; }
-.who { box-shadow: inset 0 0 0 1px var(--edge); font-size: 14px; font-weight: 600; }
 
 .send {
   grid-column: 1 / -1;
@@ -205,6 +204,14 @@ body.mode-text #paper { cursor: text; }
 .code-input { text-transform: uppercase; letter-spacing: 0.32em; font-weight: 600; font-variant-numeric: tabular-nums; }
 .sheet-error { margin: 0; min-height: 1.2em; font-size: 13px; color: #C2261C; }
 .send.wide { width: 100%; }
+.sheet-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sheet-buttons .send { grid-column: auto; }
+.ghost {
+  height: 48px; border-radius: var(--r); cursor: pointer;
+  background: var(--paper); color: var(--ink); border: 1px solid var(--edge);
+  font: inherit; font-size: 15px; font-weight: 600;
+}
+.ghost:active { background: var(--hover); }
 
 /* ---------- 세로로 든 휴대폰 ---------- */
 .rotate {
@@ -236,10 +243,9 @@ body.mode-text #paper { cursor: text; }
   :root { --cell: 32px; --gap: 4px; --pad: 10px; }
   .rail { gap: 9px; padding: 10px; }
   .widths, .actions { padding-top: 9px; }
-  .send { height: 42px; }
-  /* 설정 시트: 코드와 이름을 나란히 놓아 한 화면에 들어오게 */
-  .sheet { width: min(520px, 100%); padding: 20px 22px 14px; gap: 10px; grid-template-columns: 1fr 1fr; column-gap: 12px; }
-  .sheet > :not(.field) { grid-column: 1 / -1; }
+  .send, .ghost { height: 42px; }
+  /* 설정 시트: 한 화면에 들어오게 */
+  .sheet { width: min(420px, 100%); padding: 20px 22px 14px; gap: 10px; }
   .sheet-sub { margin: -4px 0 0; }
   .sheet-error { min-height: 0; }
   .sheet-foot { padding-top: 2px; }

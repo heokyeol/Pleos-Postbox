@@ -51,42 +51,36 @@ function localApi() {
   };
 }
 
-// ---------- 처음 설정 ----------
+// ---------- 처음 설정: 가족 코드 (이름은 보낼 때 묻는다) ----------
 let family = store.get("postbox.code");
-let sender = store.get("postbox.name");
 const urlCode = new URLSearchParams(location.search).get("code")?.toUpperCase();
 if (urlCode && CODE_RE.test(urlCode) && urlCode !== family) family = null;
 
 function openSetup() {
   $("code-input").value = family || (urlCode && CODE_RE.test(urlCode) ? urlCode : "");
-  $("name-input").value = sender || "";
   $("setup-error").textContent = "";
   $("sheet").hidden = false;
   document.body.classList.add("setup");
-  ($("code-input").value ? $("name-input") : $("code-input")).focus();
+  $("code-input").focus();
 }
 function closeSetup() {
   $("sheet").hidden = true;
   document.body.classList.remove("setup");
-  $("who-initial").textContent = [...sender][0];
   fitBoard();
 }
 
 $("setup-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const code = $("code-input").value.trim().toUpperCase();
-  const name = $("name-input").value.trim();
   const err = $("setup-error");
   if (!CODE_RE.test(code)) { err.textContent = "가족 코드 6자리를 확인해 주세요."; return; }
-  if (!name) { err.textContent = "이름을 적어 주세요."; return; }
   try {
     if (!(await api.familyExists(code))) { err.textContent = "이 코드로 연결된 차가 없어요."; return; }
   } catch { err.textContent = "인터넷 연결을 확인해 주세요."; return; }
-  family = code; sender = name;
-  store.set("postbox.code", code); store.set("postbox.name", name);
+  family = code;
+  store.set("postbox.code", code);
   closeSetup();
 });
-$("who-btn").addEventListener("click", openSetup);
 
 // ---------- 스케치북 크기: 차 화면 비율로 꽉 차게 ----------
 const stage = $("stage");
@@ -403,13 +397,31 @@ function leaveAnimation() {
   return new Promise((ok) => { canvas.addEventListener("animationend", ok, { once: true }); setTimeout(ok, 800); });
 }
 
-$("send-btn").addEventListener("click", async () => {
+// 보내기 → 이름 묻기 → 확인을 누르면 보낸다. 지난번 이름을 미리 채워 둔다.
+$("send-btn").addEventListener("click", () => {
   commitText();
   if (strokes.length === 0 && texts.length === 0) { toast("먼저 그림이나 글을 넣어 주세요."); return; }
+  $("name-input").value = store.get("postbox.name") || "";
+  $("name-error").textContent = "";
+  $("name-sheet").hidden = false;
+  $("name-input").focus();
+  $("name-input").select();
+});
+const closeNameSheet = () => { $("name-sheet").hidden = true; };
+$("name-cancel").addEventListener("click", closeNameSheet);
+$("name-sheet").addEventListener("click", (e) => { if (e.target === $("name-sheet")) closeNameSheet(); });
+$("name-input").addEventListener("keydown", (e) => { if (e.key === "Escape") closeNameSheet(); });
+
+$("name-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = $("name-input").value.trim();
+  if (!name) { $("name-error").textContent = "이름을 적어 주세요."; return; }
+  store.set("postbox.name", name);
+  closeNameSheet();
   const btn = $("send-btn");
   btn.disabled = true;
   try {
-    await api.send({ family_code: family, sender_name: sender, aspect: ASPECT, strokes, texts, text: null });
+    await api.send({ family_code: family, sender_name: name, aspect: ASPECT, strokes, texts, text: null });
     await leaveAnimation();
     strokes = []; texts = []; history = []; startedAt = null;
     canvas.classList.remove("leaving");
@@ -424,5 +436,5 @@ $("send-btn").addEventListener("click", async () => {
 });
 
 // ---------- 시작 ----------
-if (family && sender) closeSetup(); else openSetup();
+if (family) closeSetup(); else openSetup();
 fitBoard();

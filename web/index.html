@@ -42,7 +42,6 @@
         <button class="icon-btn" id="text-btn" type="button" aria-label="글상자" aria-pressed="false">
           <svg viewBox="0 0 24 24"><path d="M5 6.5V5h14v1.5M12 5v14M9 19h6"/></svg>
         </button>
-        <button class="icon-btn who" id="who-btn" type="button" aria-label="보내는 사람 바꾸기"><span id="who-initial"></span></button>
       </div>
       <button class="send" id="send-btn" type="button">
         <span>보내기</span>
@@ -51,23 +50,35 @@
     </aside>
   </main>
 
-  <!-- 처음 한 번: 가족 코드와 이름 -->
+  <!-- 처음 한 번: 가족 코드 -->
   <div class="sheet-backdrop" id="sheet" hidden>
     <form class="sheet" id="setup-form" novalidate>
       <h1 class="sheet-title"><img src="brand/pleos.svg" alt="Pleos" width="70" height="20"><span>Postbox</span></h1>
-      <p class="sheet-sub">차 화면에 보이는 가족 코드와, 편지에 쓸 이름을 알려 주세요.</p>
+      <p class="sheet-sub">차 화면에 보이는 가족 코드를 알려 주세요.</p>
       <label class="field">
         <span>가족 코드</span>
         <input id="code-input" class="code-input" inputmode="text" autocomplete="off" autocapitalize="characters"
                spellcheck="false" maxlength="6" placeholder="K7Q2MX" required>
       </label>
-      <label class="field">
-        <span>이름</span>
-        <input id="name-input" maxlength="20" autocomplete="nickname" placeholder="예: 민준, 엄마" required>
-      </label>
       <p class="sheet-error" id="setup-error" role="alert"></p>
       <button class="send wide" type="submit"><span>시작하기</span></button>
       <div class="sheet-foot"><img src="brand/hyundai-motor-group.svg" alt="Hyundai Motor Group" width="282" height="90"></div>
+    </form>
+  </div>
+
+  <!-- 보내기 직전: 보내는 사람 이름 -->
+  <div class="sheet-backdrop" id="name-sheet" hidden>
+    <form class="sheet" id="name-form" novalidate>
+      <h2 class="sheet-title">누가 보내는 편지인가요?</h2>
+      <label class="field">
+        <span>이름</span>
+        <input id="name-input" maxlength="20" autocomplete="nickname" enterkeyhint="send" placeholder="예: 민준, 엄마" required>
+      </label>
+      <p class="sheet-error" id="name-error" role="alert"></p>
+      <div class="sheet-buttons">
+        <button class="ghost" id="name-cancel" type="button">취소</button>
+        <button class="send" type="submit"><span>확인</span></button>
+      </div>
     </form>
   </div>
 
