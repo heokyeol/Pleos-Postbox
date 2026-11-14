@@ -20,7 +20,7 @@ import com.pleospostbox.screen.LetterSource
 import java.time.ZoneId
 
 @Composable
-fun PostboxApp(vm: CarViewModel, speech: SpeechInput, now: () -> Long) {
+fun PostboxApp(vm: CarViewModel, speech: SpeechInput, now: () -> Long, onNotice: () -> Unit) {
     val model by vm.model.collectAsStateWithLifecycle()
     val pairing by vm.showPairing.collectAsStateWithLifecycle()
     val override by vm.driveOverride.collectAsStateWithLifecycle()
@@ -63,6 +63,7 @@ fun PostboxApp(vm: CarViewModel, speech: SpeechInput, now: () -> Long) {
                 drive = model.drive,
                 manual = override != null,
                 onIgnition = vm::restartIgnition,
+                onNotice = onNotice,
                 onDrive = vm::overrideDrive,
                 onReset = vm::resetRead,
                 onPairing = vm::showPairing,

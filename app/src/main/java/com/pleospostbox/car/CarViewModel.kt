@@ -88,6 +88,9 @@ class CarViewModel(
         restartIgnition()
     }
 
+    /** 시연용: 읽음 표시만 지운다. 화면은 다음 시동(앱이 다시 앞으로 올 때)에 바뀐다. */
+    fun clearReadMarks() = repo.resetOpened()
+
     private fun dispatch(event: CarEvent) {
         val before = _model.value
         val after = reduce(before, event)

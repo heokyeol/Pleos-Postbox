@@ -31,6 +31,7 @@ fun DebugLayer(
     drive: DriveState,
     manual: Boolean,
     onIgnition: () -> Unit,
+    onNotice: () -> Unit,
     onDrive: (DriveState?) -> Unit,
     onReset: () -> Unit,
     onPairing: () -> Unit,
@@ -54,6 +55,7 @@ fun DebugLayer(
                 )
                 val m = Modifier.fillMaxWidth()
                 PillButton(stringResource(R.string.debug_ignition), onIgnition, m, look = Look.SolidPrimary)
+                PillButton(stringResource(R.string.debug_notice), { open = false; onNotice() }, m, look = Look.Solid)
                 if (drive == DriveState.PARKED) {
                     PillButton(stringResource(R.string.debug_drive), { onDrive(DriveState.DRIVING) }, m, look = Look.Solid)
                 } else {

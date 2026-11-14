@@ -48,9 +48,15 @@
     <!-- 음성 인식 자리표시. Pleos STT를 붙이면 지운다. -->
     <string name="fake_speech">조금 늦어, 먼저 먹고 있어</string>
 
+    <!-- 시동 알림 -->
+    <string name="notice_channel">새 편지</string>
+    <string name="notice_title">새 편지 %1$d통이 도착했어요</string>
+    <string name="notice_later">나중에</string>
+
     <!-- 디버그 패널 (오른쪽 위 모서리를 길게 누르면 열린다) -->
     <string name="debug_title">시연용</string>
     <string name="debug_ignition">시동 다시 켜기</string>
+    <string name="debug_notice">시동 알림 보내기</string>
     <string name="debug_drive">주행 중으로</string>
     <string name="debug_park">주차로</string>
     <string name="debug_use_car">차량 신호 쓰기</string>
