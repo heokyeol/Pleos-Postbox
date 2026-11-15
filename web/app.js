@@ -39,16 +39,37 @@ function remoteApi({ supabaseUrl, supabaseAnonKey }) {
   };
 }
 
+/**
+ * 미리보기 모드(config.js 없음). tools/dev_server.py로 띄웠으면 편지를 맥의 파일로 보내고,
+ * 그 서버가 없으면(정적 서버 등) 이 브라우저의 localStorage에 쌓는다.
+ */
 function localApi() {
   const KEY = "postbox.local.letters";
+  const toBrowser = (letter) => {
+    const list = JSON.parse(store.get(KEY) || "[]");
+    list.push({ ...letter, id: newId(), created_at: new Date().toISOString(), opened_at: null });
+    store.set(KEY, JSON.stringify(list));
+  };
   return {
     familyExists: async () => true,
     send: async (letter) => {
-      const list = JSON.parse(store.get(KEY) || "[]");
-      list.push({ ...letter, id: crypto.randomUUID(), created_at: new Date().toISOString(), opened_at: null });
-      store.set(KEY, JSON.stringify(list));
+      let res;
+      try {
+        res = await fetch("/api/letters", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(letter) });
+      } catch { return toBrowser(letter); }        // 서버에 닿지 못함
+      if (res.status === 404 || res.status === 405 || res.status === 501) return toBrowser(letter); // 저장 기능 없는 서버
+      if (!res.ok) throw new Error(`저장 실패 ${res.status}`);
     },
   };
+}
+
+/** crypto.randomUUID는 https·localhost에서만 된다. 같은 와이파이의 http 주소에서도 되게 대신 만든다. */
+function newId() {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  const b = crypto.getRandomValues(new Uint8Array(16));
+  b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+  const h = [...b].map((x) => x.toString(16).padStart(2, "0")).join("");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
 }
 
 // ---------- 처음 설정: 가족 코드 (이름은 보낼 때 묻는다) ----------
