@@ -47,7 +47,7 @@ fun ArchiveScreen(
     val groups = remember(letters, zone) { letters.groupBy { TimeLabels.localDate(it.createdAt, zone) }
         .mapValues { (_, day) -> day.sortedBy { it.createdAt } } }
     val today = TimeLabels.localDate(nowMs, zone)
-    Column(Modifier.fillMaxSize().background(Ink.Black)) {
+    Column(Modifier.fillMaxSize().background(Ink.Night)) {
         Row(
             Modifier.padding(start = 64.u, end = 64.u, top = 48.u).fillMaxWidth().height(104.u),
             verticalAlignment = Alignment.CenterVertically,

@@ -13,9 +13,10 @@ import androidx.compose.ui.unit.sp
 
 /** docs/design/screens.html, car-v2.html 의 색. */
 object Ink {
-    val Black = Color(0xFF0C0B0A)      // 따뜻한 검정
-    val Surface = Color(0xFF1D1B19)    // 어두운 바탕 위 버튼·패널
-    val Line = Color(0xFF36322E)
+    val Black = Color(0xFF0C0B0A)      // 따뜻한 검정 (QR, 밝은 버튼 위 글자)
+    val Night = Color(0xFF0F1A2E)      // 바탕: 미드나잇 네이비 단색
+    val Surface = Color(0xFF1F2B44)    // 남색 바탕 위 버튼·패널
+    val Line = Color(0xFF34405C)
     val White = Color(0xFFF6F1E9)      // 글자·주 버튼
     val Paper = Color(0xFFFFFFFF)      // 종이만 순백
     val Dim = Color(0xFFA9A198)        // 보조 글자

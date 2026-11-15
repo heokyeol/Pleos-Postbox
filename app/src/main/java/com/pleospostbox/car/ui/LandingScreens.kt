@@ -44,7 +44,7 @@ import com.pleospostbox.car.R
 @Composable
 fun PairingScreen(code: String, onConfirm: () -> Unit) {
     val url = stringResource(R.string.web_url) + "?code=" + code
-    Row(Modifier.fillMaxSize().background(Ink.Black).padding(start = 48.u, top = 48.u, bottom = 48.u, end = 96.u)) {
+    Row(Modifier.fillMaxSize().background(Ink.Night).padding(start = 48.u, top = 48.u, bottom = 48.u, end = 96.u)) {
         Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween) {
             Brand(height = 30, textSize = 36)
             Column {
@@ -83,7 +83,7 @@ fun QrCode(content: String, modifier: Modifier) {
 /** C2 편지 없음: 점선 빈 종이와 한 줄. */
 @Composable
 fun EmptyScreen(onInvite: () -> Unit) {
-    Box(Modifier.fillMaxSize().background(Ink.Black)) {
+    Box(Modifier.fillMaxSize().background(Ink.Night)) {
         Column(
             Modifier.offset(48.u, 48.u).width(240.u).height(984.u),
             verticalArrangement = Arrangement.SpaceBetween,
@@ -115,7 +115,7 @@ fun EmptyScreen(onInvite: () -> Unit) {
 /** 주행 중 잠금. 그림·버튼·움직임 없음. */
 @Composable
 fun LockedScreen(newCount: Int) {
-    Box(Modifier.fillMaxSize().background(Ink.Black), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(Ink.Night), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(28.u)) {
             Box(Modifier.size(140.u).clip(CircleShape).background(Ink.Surface), contentAlignment = Alignment.Center) {
                 Image(painterResource(R.drawable.ic_lock), null, Modifier.size(60.u), colorFilter = ColorFilter.tint(Ink.White))
@@ -139,13 +139,21 @@ fun LockedScreen(newCount: Int) {
 /** 시동 전에 온 새 편지: 봉투, "새로운 편지가 n통 왔어요.", 읽기 / 나중에 읽기. */
 @Composable
 fun ArrivedScreen(count: Int, onRead: () -> Unit, onLater: () -> Unit) {
-    Box(Modifier.fillMaxSize().background(Ink.Black)) {
+    Box(Modifier.fillMaxSize().background(Ink.Night)) {
         Brand(Modifier.offset(64.u, 76.u), textSize = 34)
         Column(
             Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Envelope(Modifier.size(560.u, 360.u).clip(RoundedCornerShape(24.u)))
+            // 새 알림 표시: 봉투 오른쪽 위 꼭짓점에 걸친 빨간 점. 바탕색 테두리로 봉투와 떼어 보이게 한다.
+            Box(Modifier.size(560.u, 360.u)) {
+                Envelope(Modifier.fillMaxSize().clip(RoundedCornerShape(24.u)))
+                Box(
+                    Modifier.align(Alignment.TopEnd).offset(28.u, (-28).u).size(72.u)
+                        .clip(CircleShape).background(Ink.Night).padding(8.u)
+                        .clip(CircleShape).background(Ink.Unread)
+                )
+            }
             Spacer(Modifier.height(64.u))
             Text(
                 stringResource(R.string.arrived_title, count),

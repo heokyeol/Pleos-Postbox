@@ -27,7 +27,7 @@ fun PostboxApp(vm: CarViewModel, speech: SpeechInput, now: () -> Long, onNotice:
     val played = remember { mutableSetOf<String>() }
     val zone = remember { ZoneId.systemDefault() }
 
-    BoxWithConstraints(Modifier.fillMaxSize().background(Ink.Black)) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(Ink.Night)) {
         val unit = minOf(maxWidth.value / 1920f, maxHeight.value / 1080f)
         CompositionLocalProvider(LocalUnit provides unit, LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = AppFont)) {
             if (pairing) {
