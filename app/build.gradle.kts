@@ -19,9 +19,24 @@ android {
     // CarUxRestrictionsManager(주행/주차 판단)용. 런타임에는 차량 시스템이 제공한다.
     useLibrary("android.car")
 
+    // release 서명. 키스토어와 비밀번호는 저장소에 두지 않고 환경 변수로만 받는다.
+    // tools/build_release.sh가 비밀번호를 입력받아 넘겨 준다.
+    val releaseKeystore = System.getenv("PLEOS_KEYSTORE")
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = file(releaseKeystore)
+                storePassword = System.getenv("PLEOS_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("PLEOS_KEY_ALIAS") ?: "pleos-postbox"
+                keyPassword = System.getenv("PLEOS_KEY_PASSWORD") ?: System.getenv("PLEOS_KEYSTORE_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            if (releaseKeystore != null) signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
