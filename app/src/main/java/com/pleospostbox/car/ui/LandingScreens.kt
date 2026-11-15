@@ -135,3 +135,27 @@ fun LockedScreen(newCount: Int) {
         }
     }
 }
+
+/** 시동 전에 온 새 편지: 봉투, "새로운 편지가 n통 왔어요.", 읽기 / 나중에 읽기. */
+@Composable
+fun ArrivedScreen(count: Int, onRead: () -> Unit, onLater: () -> Unit) {
+    Box(Modifier.fillMaxSize().background(Ink.Black)) {
+        Brand(Modifier.offset(64.u, 76.u), textSize = 34)
+        Column(
+            Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Envelope(Modifier.size(560.u, 360.u).clip(RoundedCornerShape(24.u)))
+            Spacer(Modifier.height(64.u))
+            Text(
+                stringResource(R.string.arrived_title, count),
+                color = Ink.White, fontSize = 56.su, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(56.u))
+            Row(horizontalArrangement = Arrangement.spacedBy(24.u)) {
+                PillButton(stringResource(R.string.arrived_read), onRead, Modifier.width(320.u), look = Look.SolidPrimary)
+                PillButton(stringResource(R.string.arrived_later), onLater, Modifier.width(320.u), look = Look.Solid)
+            }
+        }
+    }
+}

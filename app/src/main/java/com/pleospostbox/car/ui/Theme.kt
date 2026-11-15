@@ -24,6 +24,9 @@ object Ink {
     val Glass = Color(0x850C0B0A)      // 종이 위 반투명 버튼 (검정 52%)
     val GlassStrong = Color(0xE00C0B0A) // 그림 위에서도 읽혀야 하는 문장 띠 (검정 88%)
     val GlassHi = Color(0xE6F6F1E9)    // 종이 위 반투명 주 버튼 (흰색 90%)
+    val Envelope = Color(0xFFEFE8DC)   // 안 읽은 편지 봉투
+    val Flap = Color(0xFFE2D9CA)       // 봉투 덮개
+    val Unread = Color(0xFFE5484D)     // 안 읽은 편지 점
 }
 
 /**

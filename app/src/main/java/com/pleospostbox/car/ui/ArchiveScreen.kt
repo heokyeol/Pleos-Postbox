@@ -36,7 +36,14 @@ import java.time.ZoneId
  * 썸네일 아래 보낸 사람(크게)과 시각(작게).
  */
 @Composable
-fun ArchiveScreen(letters: List<Letter>, nowMs: Long, zone: ZoneId, onOpen: (Letter) -> Unit, onInvite: () -> Unit) {
+fun ArchiveScreen(
+    letters: List<Letter>,
+    isUnread: (String) -> Boolean,
+    nowMs: Long,
+    zone: ZoneId,
+    onOpen: (Letter) -> Unit,
+    onInvite: () -> Unit,
+) {
     val groups = remember(letters, zone) { letters.groupBy { TimeLabels.localDate(it.createdAt, zone) }
         .mapValues { (_, day) -> day.sortedBy { it.createdAt } } }
     val today = TimeLabels.localDate(nowMs, zone)
@@ -74,19 +81,18 @@ fun ArchiveScreen(letters: List<Letter>, nowMs: Long, zone: ZoneId, onOpen: (Let
                         Text(soft, color = Ink.Dim, fontSize = 34.su, fontWeight = FontWeight.Medium)
                     }
                 }
-                items(items, key = { it.id }) { l -> ArchiveCard(l, zone) { onOpen(l) } }
+                items(items, key = { it.id }) { l -> ArchiveCard(l, isUnread(l.id), zone) { onOpen(l) } }
             }
         }
     }
 }
 
 @Composable
-private fun ArchiveCard(letter: Letter, zone: ZoneId, onClick: () -> Unit) {
+private fun ArchiveCard(letter: Letter, unread: Boolean, zone: ZoneId, onClick: () -> Unit) {
     Column(Modifier.clickable(onClick = onClick)) {
-        LetterCanvas(
-            letter, null,
-            Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(20.u)),
-        )
+        val thumb = Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(20.u))
+        // 안 읽은 편지는 그림을 봉투로 가린다
+        if (unread) Envelope(thumb) else LetterCanvas(letter, null, thumb)
         Row(
             Modifier.padding(top = 20.u),
             verticalAlignment = Alignment.Bottom,
@@ -97,6 +103,7 @@ private fun ArchiveCard(letter: Letter, zone: ZoneId, onClick: () -> Unit) {
                 TimeLabels.clock(letter.createdAt, zone), color = Ink.Dim, fontSize = 32.su, maxLines = 1,
                 modifier = Modifier.padding(bottom = 3.u),
             )
+            if (unread) UnreadDot(Modifier.align(Alignment.CenterVertically).padding(top = 6.u))
         }
     }
 }

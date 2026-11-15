@@ -37,7 +37,11 @@ fun PostboxApp(vm: CarViewModel, speech: SpeechInput, now: () -> Long, onNotice:
                 when (val s = model.screen) {
                     CarScreenState.Empty -> EmptyScreen(vm::showPairing)
                     is CarScreenState.Locked -> LockedScreen(s.newCount)
-                    CarScreenState.Archive -> ArchiveScreen(model.archive, now(), zone, vm::open, vm::showPairing)
+                    is CarScreenState.Arrived -> {
+                        ArrivedScreen(s.count, vm::readNew, vm::later)
+                        BackHandler { vm.later() }
+                    }
+                    CarScreenState.Archive -> ArchiveScreen(model.archive, model::isUnread, now(), zone, vm::open, vm::showPairing)
                     is CarScreenState.Reading -> {
                         val l = s.letter
                         val reply = s.reply

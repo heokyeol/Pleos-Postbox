@@ -59,6 +59,8 @@ class CarViewModel(
     }
 
     fun toArchive() = dispatch(CarEvent.ToArchive)
+    fun readNew() = dispatch(CarEvent.ReadNew)
+    fun later() = dispatch(CarEvent.Later)
     fun prev() = dispatch(CarEvent.Prev)
     fun next() = dispatch(CarEvent.Next)
     fun open(letter: Letter) = dispatch(CarEvent.Open(letter))

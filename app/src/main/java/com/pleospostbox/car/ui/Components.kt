@@ -1,6 +1,7 @@
 package com.pleospostbox.car.ui
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,6 +22,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -121,4 +124,26 @@ fun Brand(modifier: Modifier = Modifier, @Suppress("UNUSED_PARAMETER") height: I
         stringResource(R.string.brand), modifier = modifier,
         color = Ink.White, fontSize = textSize.su, fontWeight = FontWeight.SemiBold, maxLines = 1,
     )
+}
+
+/** 닫힌 편지봉투 뒷면. 안 읽은 편지 썸네일과 도착 화면에 쓴다. 크기는 modifier가 정한다. */
+@Composable
+fun Envelope(modifier: Modifier = Modifier) {
+    Canvas(modifier.background(Ink.Envelope)) {
+        val w = size.width
+        val h = size.height
+        val tip = h * 0.56f
+        val flap = Path().apply { moveTo(0f, 0f); lineTo(w, 0f); lineTo(w / 2, tip); close() }
+        drawPath(flap, Ink.Flap)
+        val edge = Path().apply { moveTo(0f, 0f); lineTo(w / 2, tip); lineTo(w, 0f) }
+        drawPath(edge, Ink.Dim.copy(alpha = 0.45f), style = Stroke(width = h * 0.008f))
+        val foot = Path().apply { moveTo(0f, h); lineTo(w * 0.42f, h * 0.5f); moveTo(w, h); lineTo(w * 0.58f, h * 0.5f) }
+        drawPath(foot, Ink.Dim.copy(alpha = 0.22f), style = Stroke(width = h * 0.006f))
+    }
+}
+
+/** 안 읽은 편지 표시: 작은 빨간 점. */
+@Composable
+fun UnreadDot(modifier: Modifier = Modifier) {
+    Box(modifier.size(16.u).clip(CircleShape).background(Ink.Unread))
 }

@@ -38,10 +38,10 @@ class StrokeReplayTest {
     }
 
     @Test fun text_placed_after_last_stroke_extends_replay() {
-        val texts = listOf(TextBox(0f, 0f, "안녕", "#000000", 0.05f, t = 5_000))
-        assertEquals(5_000L, replayDurationMs(twoStrokes, texts))
-        assertTrue(visibleTexts(texts, twoStrokes, elapsedMs = 4_000).isEmpty())
-        assertEquals(texts, visibleTexts(texts, twoStrokes, elapsedMs = 5_000))
+        val texts = listOf(TextBox(0f, 0f, "안녕", "#000000", 0.05f, t = 4_000))
+        assertEquals(4_000L, replayDurationMs(twoStrokes, texts))
+        assertTrue(visibleTexts(texts, twoStrokes, elapsedMs = 3_500).isEmpty())
+        assertEquals(texts, visibleTexts(texts, twoStrokes, elapsedMs = 4_000))
     }
 
     @Test fun texts_are_compressed_with_strokes() {
@@ -49,5 +49,19 @@ class StrokeReplayTest {
         val texts = listOf(TextBox(0f, 0f, "a", "#000000", 0.05f, t = 8_000))
         assertTrue(visibleTexts(texts, long, elapsedMs = 3_000).isEmpty())
         assertEquals(texts, visibleTexts(texts, long, elapsedMs = 4_000))
+    }
+
+    @Test fun long_pause_between_strokes_shrinks_to_1s() {
+        val paused = listOf(stroke(0, 500), stroke(4_500, 5_000)) // 4초 멈춤
+        assertEquals(2_000L, replayDurationMs(paused))
+        assertEquals(listOf(stroke(0, 500), stroke(1_500)), visibleStrokes(paused, elapsedMs = 1_500))
+        assertEquals(5_000L, replayDurationMs(listOf(stroke(0, 5_000)))) // 획 안의 시간은 그대로
+    }
+
+    @Test fun texts_follow_shrunk_pause() {
+        val texts = listOf(TextBox(0f, 0f, "a", "#000000", 0.05f, t = 10_000))
+        val strokes = listOf(stroke(0, 500))
+        assertEquals(1_500L, replayDurationMs(strokes, texts))
+        assertEquals(texts, visibleTexts(texts, strokes, elapsedMs = 1_500))
     }
 }

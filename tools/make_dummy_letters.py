@@ -24,11 +24,16 @@ SCHEDULE = [
     (5, "11-12T17:20", "11-12T18:35"),  # 민진: 이번 주말에는 치킨
     (1, "11-12T18:10", "11-12T18:35"),  # 아내: 추운데 조심히 와, 저녁은 고등어김치찌개야
     (0, "11-12T21:30", "11-13T08:10"),  # 민준: 아빠 사랑해요
-    (10, "11-13T17:40", None),          # 민준: 아빠 안전운전 하세요 (새 편지)
-    (9, "11-13T18:25", None),           # 민준: 아빠 언제 와요 (새 편지)
-    (4, "11-14T07:50", "11-14T08:05"),  # 아내: 아침부터 잔소리해서 미안해
-    (6, "11-14T19:20", "11-14T19:40"),  # 민준: 가족 그림
+    (6, "11-13T17:40", "11-13T18:50"),  # 민준: 가족 그림
+    (9, "11-13T18:25", "11-13T18:50"),  # 민준: 아빠 언제 와요
+    (4, "11-14T07:50", None),           # 아내: 아침부터 잔소리해서 미안해 (새 편지)
+    (10, "11-14T19:20", None),          # 민준: 아빠 안전운전 하세요 (새 편지)
 ]
+
+# 보낸 이름을 차량 화면에서 바꿔 보여줄 때 (웹에서 보낸 이름 → 더미 이름)
+RENAME = {
+    "아내": "❤️❤️",
+}
 
 # 보냈지만 더미에 넣지 않는 편지 (web_letters.json 순번)
 EXCLUDE = {
@@ -51,7 +56,7 @@ def main():
     for n, (i, created, opened) in enumerate(SCHEDULE, 1):
         l = sent[i]
         letters.append({
-            "id": f"dummy-{n:02d}", "family_code": FAMILY, "sender_name": l["sender_name"],
+            "id": f"dummy-{n:02d}", "family_code": FAMILY, "sender_name": RENAME.get(l["sender_name"], l["sender_name"]),
             "created_at": stamp(created), "opened_at": stamp(opened),
             "aspect": l["aspect"], "strokes": l["strokes"], "texts": l.get("texts", []), "text": l.get("text"),
         })

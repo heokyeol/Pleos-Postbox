@@ -38,6 +38,8 @@ class CarViewModelTest {
 
     @Test fun startup_shows_letters_sent_before_ignition_oldest_first() {
         val v = vm(FakeRepo(listOf(old, b, a, late)))
+        assertEquals(CarScreenState.Arrived(2), v.model.value.screen)
+        v.readNew()
         assertEquals(Reading(a, NEW, index = 0, total = 2), v.model.value.screen)
         assertEquals(listOf(b, a, old), v.model.value.archive)
     }
@@ -45,6 +47,8 @@ class CarViewModelTest {
     @Test fun shown_letters_are_marked_opened() {
         val repo = FakeRepo(listOf(old, a, b))
         val v = vm(repo)
+        assertTrue(repo.opened.isEmpty()) // 도착 화면에서는 아직 안 읽었다
+        v.readNew()
         assertEquals(setOf("a"), repo.opened.keys)
         v.next()
         assertEquals(setOf("a", "b"), repo.opened.keys)
@@ -52,16 +56,19 @@ class CarViewModelTest {
 
     @Test fun to_archive_leaves_unseen_letters_new_for_next_ignition() {
         val repo = FakeRepo(listOf(a, b))
-        vm(repo).toArchive()
+        vm(repo).apply { readNew() }.toArchive()
         assertEquals(setOf("a"), repo.opened.keys)
         clock = 2_000
         val v = vm(repo)
+        assertEquals(CarScreenState.Arrived(1), v.model.value.screen)
+        v.readNew()
         assertEquals(Reading(b, NEW, index = 0, total = 1), v.model.value.screen)
     }
 
     @Test fun reply_is_recorded_and_shown_on_same_letter() {
         val repo = FakeRepo(listOf(a, b))
         val v = vm(repo)
+        v.readNew()
         v.requestReply()
         v.sendReply("고마워", preset = true)
         assertEquals(listOf(Reply("a", "고마워", null)), repo.replies)
@@ -71,6 +78,7 @@ class CarViewModelTest {
     @Test fun voice_reply_goes_to_text() {
         val repo = FakeRepo(listOf(a))
         val v = vm(repo)
+        v.readNew()
         v.requestReply()
         v.sendReply("조금 늦어", preset = false)
         assertEquals(Reply("a", null, "조금 늦어"), repo.replies.single())
@@ -78,27 +86,32 @@ class CarViewModelTest {
 
     @Test fun next_ignition_does_not_show_read_letters_again_but_shows_late_one() {
         val repo = FakeRepo(listOf(a, late))
-        vm(repo)
+        vm(repo).readNew()
         clock = 2_000
         val v = vm(repo)
+        v.readNew()
         assertEquals(Reading(late, NEW, index = 0, total = 1), v.model.value.screen)
     }
 
     @Test fun reset_read_shows_new_letters_again() {
         val repo = FakeRepo(listOf(old, a))
         val v = vm(repo)
+        v.readNew()
         v.toArchive()
         v.resetRead()
-        assertEquals(Reading(a, NEW, index = 0, total = 1), v.model.value.screen)
+        assertEquals(CarScreenState.Arrived(1), v.model.value.screen)
     }
 
     @Test fun drive_override_beats_system_signal_until_cleared() {
         val v = vm(FakeRepo(listOf(a, b)))
+        v.readNew()
         v.overrideDrive(DriveState.DRIVING)
         assertEquals(CarScreenState.Locked(1), v.model.value.screen)
         v.onSystemDrive(DriveState.PARKED)
         assertEquals(CarScreenState.Locked(1), v.model.value.screen)
         v.overrideDrive(null)
+        assertEquals(CarScreenState.Arrived(1), v.model.value.screen)
+        v.readNew()
         assertEquals(Reading(b, NEW, index = 1, total = 2), v.model.value.screen)
     }
 
@@ -107,6 +120,7 @@ class CarViewModelTest {
         val v = CarViewModel(repo, PairingStore(MemoryStore()), { clock }, { 500 }).apply { overrideDrive(DriveState.DRIVING) }
         repo.opened.clear()
         v.restartIgnition()
+        v.readNew()
         v.next()
         assertTrue(repo.opened.isEmpty())
     }

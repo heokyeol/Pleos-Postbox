@@ -15,6 +15,11 @@
     <string name="invite">가족 초대</string>
     <string name="archive_title">받은 편지</string>
 
+    <!-- 새 편지 도착 -->
+    <string name="arrived_title">새로운 편지가 %1$d통 왔어요.</string>
+    <string name="arrived_read">읽기</string>
+    <string name="arrived_later">나중에 읽기</string>
+
     <!-- 주행 중 잠금 -->
     <string name="locked_waiting">편지 %1$s 통이 기다리고 있어요</string>
     <string name="locked_waiting_sub">주차하면 열려요</string>

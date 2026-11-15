@@ -17,6 +17,8 @@ sealed interface CarScreenState {
     data object Empty : CarScreenState
     /** 주차가 아니다. 그림은 보이지 않는다. newCount는 아직 안 본 새 편지 수. */
     data class Locked(val newCount: Int) : CarScreenState
+    /** 시동 전에 온 새 편지가 있다: 봉투와 "새로운 편지가 n통 왔어요", 읽기 / 나중에 읽기. */
+    data class Arrived(val count: Int) : CarScreenState
     /** 받은 편지함. 목록은 CarModel.archive. */
     data object Archive : CarScreenState
     /** 편지 한 장을 화면 가득 본다. index는 0부터. reply는 이 편지에 방금 보낸 답장. */
@@ -41,6 +43,10 @@ sealed interface CarEvent {
     data class DriveChanged(val state: DriveState) : CarEvent
     /** '목록으로' */
     data object ToArchive : CarEvent
+    /** 도착 화면의 '읽기': 안 본 첫 새 편지를 연다. */
+    data object ReadNew : CarEvent
+    /** 도착 화면의 '나중에 읽기': 편지함으로 간다. */
+    data object Later : CarEvent
     /** ‹ 시간상 더 이전에 온 편지 */
     data object Prev : CarEvent
     /** › 더 최근에 온 편지 */
@@ -55,6 +61,7 @@ sealed interface CarEvent {
  * batch: 이번 시동에 도착한 새 편지(오래된 순).
  * archive: 받은 편지 전부(새 편지 포함), 최신순.
  * seen: 이번 시동에 화면에 한 번이라도 띄운 편지 id. 띄운 편지는 읽은 것으로 기록된다.
+ * later: 이번 시동에 '나중에 읽기'나 '목록으로'를 눌렀다. 그 뒤로는 주차해도 도착 화면 대신 편지함을 보여준다.
  */
 data class CarModel(
     val screen: CarScreenState,
@@ -62,8 +69,12 @@ data class CarModel(
     val archive: List<Letter>,
     val seen: Set<String>,
     val drive: DriveState,
+    val later: Boolean = false,
 ) {
     val unseenCount: Int get() = batch.count { it.id !in seen }
+
+    /** 편지함에서 봉투로 가려 보여줄 편지: 이번 시동의 새 편지 중 아직 안 본 것. */
+    fun isUnread(id: String): Boolean = id !in seen && batch.any { it.id == id }
 
     companion object {
         fun initial(drive: DriveState) = CarModel(CarScreenState.Empty, emptyList(), emptyList(), emptySet(), drive)
@@ -77,6 +88,7 @@ fun reduce(model: CarModel, event: CarEvent): CarModel {
             batch = event.newLetters,
             archive = (event.newLetters + event.archived).distinctBy { it.id }.sortedByDescending { it.createdAt },
             seen = emptySet(),
+            later = false,
         ).withDefaultScreen()
     }
     if (event is CarEvent.DriveChanged) {
@@ -89,7 +101,15 @@ fun reduce(model: CarModel, event: CarEvent): CarModel {
     val s = model.screen
     return when (event) {
         CarEvent.ToArchive ->
-            if (s is CarScreenState.Reading) model.copy(screen = CarScreenState.Archive) else model
+            if (s is CarScreenState.Reading) model.copy(screen = CarScreenState.Archive, later = true) else model
+
+        CarEvent.ReadNew -> {
+            val i = model.batch.indexOfFirst { it.id !in model.seen }
+            if (s is CarScreenState.Arrived && i >= 0) model.read(LetterSource.NEW, i) else model
+        }
+
+        CarEvent.Later ->
+            if (s is CarScreenState.Arrived) model.copy(screen = CarScreenState.Archive, later = true) else model
 
         CarEvent.Prev, CarEvent.Next -> {
             if (s !is CarScreenState.Reading) return model
@@ -129,6 +149,6 @@ private fun CarModel.read(source: LetterSource, index: Int): CarModel {
 private fun CarModel.withDefaultScreen(): CarModel {
     if (archive.isEmpty()) return copy(screen = CarScreenState.Empty)
     if (drive != DriveState.PARKED) return copy(screen = CarScreenState.Locked(unseenCount))
-    val firstUnseen = batch.indexOfFirst { it.id !in seen }
-    return if (firstUnseen >= 0) read(LetterSource.NEW, firstUnseen) else copy(screen = CarScreenState.Archive)
+    return if (unseenCount > 0 && !later) copy(screen = CarScreenState.Arrived(unseenCount))
+    else copy(screen = CarScreenState.Archive)
 }
