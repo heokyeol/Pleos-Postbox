@@ -8,7 +8,7 @@
 **차량용 앱**
 1. 에뮬레이터(Pleos Connect v2.1.0)를 켜고 APK를 설치합니다.
    ```bash
-   adb install -r apk/허결_PleosPostbox_release.apk
+   adb install -r apk/소풍나온수송대대_PleosPostbox_release.apk
    ```
 2. 런처에서 **Pleos Postbox**를 엽니다. 알림 권한 요청이 나오면 [허용]을 누릅니다.
 3. 가족 연결(QR) 화면에서 [확인]을 누르면 "새로운 편지가 2통 왔어요"가 뜹니다.
@@ -39,4 +39,4 @@
 
 ## APK 파일 위치 또는 GitHub Release 링크
 
-- 저장소 안 경로: [`apk/허결_PleosPostbox_release.apk`](apk/허결_PleosPostbox_release.apk)
+- 저장소 안 경로: [`apk/소풍나온수송대대_PleosPostbox_release.apk`](apk/소풍나온수송대대_PleosPostbox_release.apk)

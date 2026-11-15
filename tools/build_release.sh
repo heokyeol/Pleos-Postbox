@@ -1,5 +1,5 @@
 #!/bin/bash
-# 서명한 release APK를 만들어 apk/허결_PleosPostbox_release.apk로 복사한다.
+# 서명한 release APK를 만들어 apk/소풍나온수송대대_PleosPostbox_release.apk로 복사한다.
 #
 # 키스토어는 저장소 밖(기본 ~/keystores/pleos-postbox.jks)에 둔다.
 # 없으면 새로 만든다(keytool이 비밀번호와 이름 등을 묻는다).
@@ -13,7 +13,7 @@ export JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk@17}"
 
 KEYSTORE="${PLEOS_KEYSTORE:-$HOME/keystores/pleos-postbox.jks}"
 ALIAS="${PLEOS_KEY_ALIAS:-pleos-postbox}"
-OUT="apk/허결_PleosPostbox_release.apk"
+OUT="apk/소풍나온수송대대_PleosPostbox_release.apk"
 
 case "$KEYSTORE" in
   "$PWD"/*) echo "키스토어를 저장소 안에 두지 마세요: $KEYSTORE" >&2; exit 1 ;;
